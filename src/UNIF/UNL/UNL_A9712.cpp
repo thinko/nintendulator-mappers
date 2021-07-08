@@ -23,9 +23,15 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
-	offset = MMC3::SaveLoad(mode, offset, data);
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
+	CheckSave(offset = MMC3::SaveLoad(mode, offset, data));
 	SAVELOAD_BYTE(mode, offset, data, Reg0);
 	SAVELOAD_BYTE(mode, offset, data, Reg1);
+
+	if (IsLoad(mode))
+		Sync();
 	return offset;
 }
 
@@ -53,7 +59,7 @@ void	MAPINT	Write89 (int Bank, int Addr, int Val)
 
 BOOL	MAPINT	Load (void)
 {
-	MMC3::Load(Sync);
+	MMC3::Load(Sync, FALSE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -75,8 +81,8 @@ void	MAPINT	Unload (void)
 }
 } // namespace
 
-const MapperInfo MapperInfo_UNL_A9712 =
-{
+const MapperInfo MapperInfo_UNL_A9712
+(
 	"UNL-A9712",
 	_T("The Panda Prince pirate (with insane copy protection)"),
 	COMPAT_PARTIAL,
@@ -88,4 +94,4 @@ const MapperInfo MapperInfo_UNL_A9712 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

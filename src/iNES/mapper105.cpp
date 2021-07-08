@@ -19,7 +19,7 @@ void	Sync (void)
 	uint8_t CHRlines = MMC1::GetCHRBankLo();
 	MMC1::SyncMirror();
 	MMC1::SyncWRAM();
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 	switch (InitState)
 	{
 	case 2:	if (CHRlines & 0x08)
@@ -43,17 +43,21 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
-	uint8_t Byte = 0;
-	offset = MMC1::SaveLoad(mode, offset, data);
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
+	CheckSave(offset = MMC1::SaveLoad(mode, offset, data));
 	SAVELOAD_LONG(mode, offset, data, Counter);
-	if (mode == STATE_SAVE)
+	uint8_t Byte = 0;
+	if (IsSave(mode))
 		Byte = (uint8_t)(MaxCount >> 24);
 	SAVELOAD_BYTE(mode, offset, data, Byte);
-	if (mode == STATE_LOAD)
+	if (IsLoad(mode))
 		MaxCount = Byte << 24;
 	SAVELOAD_BYTE(mode, offset, data, CounterEnabled);
 	SAVELOAD_BYTE(mode, offset, data, InitState);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -137,7 +141,7 @@ unsigned char	MAPINT	Config (CFG_TYPE mode, unsigned char data)
 
 BOOL	MAPINT	Load (void)
 {
-	MMC1::Load(Sync);
+	MMC1::Load(Sync, FALSE);
 	ConfigWindow = NULL;
 	return TRUE;
 }
@@ -166,8 +170,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 105;
 } // namespace
 
-const MapperInfo MapperInfo_105 =
-{
+const MapperInfo MapperInfo_105
+(
 	&MapperNum,
 	_T("Nintendo World Championship"),
 	COMPAT_FULL,
@@ -179,4 +183,4 @@ const MapperInfo MapperInfo_105 =
 	SaveLoad,
 	NULL,
 	Config
-};
+);

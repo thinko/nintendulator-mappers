@@ -20,15 +20,21 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
-	offset = MMC1::SaveLoad(mode, offset, data);
-	offset = VS::SaveLoad(mode, offset, data);
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
+	CheckSave(offset = MMC1::SaveLoad(mode, offset, data));
+	CheckSave(offset = VS::SaveLoad(mode, offset, data));
+
+	if (IsLoad(mode))
+		Sync();
 	return offset;
 }
 
 BOOL	MAPINT	Load (void)
 {
 	VS::Load();
-	MMC1::Load(Sync);
+	MMC1::Load(Sync, FALSE);
 	iNES_SetSRAM();
 	return TRUE;
 }
@@ -46,8 +52,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 1;
 } // namespace
 
-const MapperInfo MapperInfo_001 =
-{
+const MapperInfo MapperInfo_001
+(
 	&MapperNum,
 	_T("MMC1"),
 	COMPAT_FULL,
@@ -59,4 +65,4 @@ const MapperInfo MapperInfo_001 =
 	SaveLoad,
 	NULL,
 	VS::Config
-};
+);

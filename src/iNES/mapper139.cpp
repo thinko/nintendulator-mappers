@@ -12,15 +12,15 @@ FCPUWrite _Write4;
 void	Sync (void)
 {
 	EMU->SetPRG_ROM32(0x8, PRG);
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 	if (Mirror & 1)
-		EMU->SetCHR_ROM8(0, (CHRH << 3) | CHRL0);
+		EMU->SetCHR_ROM8(0x0, (CHRH << 3) | CHRL0);
 	else
 	{
-		EMU->SetCHR_ROM2(0, (CHRH << 5) | (CHRL0 << 2) | 0);
-		EMU->SetCHR_ROM2(2, (CHRH << 5) | (CHRL1 << 2) | 1);
-		EMU->SetCHR_ROM2(4, (CHRH << 5) | (CHRL2 << 2) | 2);
-		EMU->SetCHR_ROM2(6, (CHRH << 5) | (CHRL3 << 2) | 3);
+		EMU->SetCHR_ROM2(0x0, (CHRH << 5) | (CHRL0 << 2) | 0);
+		EMU->SetCHR_ROM2(0x2, (CHRH << 5) | (CHRL1 << 2) | 1);
+		EMU->SetCHR_ROM2(0x4, (CHRH << 5) | (CHRL2 << 2) | 2);
+		EMU->SetCHR_ROM2(0x6, (CHRH << 5) | (CHRL3 << 2) | 3);
 	}
 	switch (Mirror >> 1)
 	{
@@ -33,6 +33,9 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, Cmd);
 	SAVELOAD_BYTE(mode, offset, data, CHRH);
 	SAVELOAD_BYTE(mode, offset, data, CHRL0);
@@ -42,7 +45,8 @@ int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 	SAVELOAD_BYTE(mode, offset, data, PRG);
 	SAVELOAD_BYTE(mode, offset, data, CHRO);
 	SAVELOAD_BYTE(mode, offset, data, Mirror);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -87,8 +91,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 139;
 } // namespace
 
-const MapperInfo MapperInfo_139 =
-{
+const MapperInfo MapperInfo_139
+(
 	&MapperNum,
 	_T("Sachen (SA8259A)"),
 	COMPAT_FULL,
@@ -100,4 +104,4 @@ const MapperInfo MapperInfo_139 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

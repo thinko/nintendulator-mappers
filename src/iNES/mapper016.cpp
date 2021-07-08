@@ -8,7 +8,6 @@
 #define EEP_DAT	0x40
 #define EEP_CLK	0x20
 
-
 class EEPROM
 {
 public:
@@ -37,6 +36,9 @@ public:
 	}
 	virtual	int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 	{
+		uint8_t ver = 0;
+		CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 		SAVELOAD_BYTE(mode, offset, data, LastBits);
 		SAVELOAD_BYTE(mode, offset, data, State);
 		SAVELOAD_BYTE(mode, offset, data, Addr);
@@ -112,6 +114,7 @@ public:
 			break;
 		case 5:	// Ack
 			BitPtr = 0;
+			Data = 0;
 			State++;
 			break;
 
@@ -124,7 +127,10 @@ public:
 			break;
 		case 7:	// Ack
 			EEP[Addr] = Data;
-			Addr = (Addr & 0xF8) | ((Addr + 1) & 0x7);
+			// Some 24C02 chips (e.g. from Microchip) use 8 or 16-byte pages, but
+			// Xicor chips (which Bandai used consistently) only use 4-byte pages
+			Addr = (Addr & 0xFC) | ((Addr + 1) & 0x3);
+			BitPtr = 0;
 			Data = 0;
 			State = 6;
 			break;
@@ -148,7 +154,11 @@ public:
 		// Read Data
 		if ((State == 8) && (LastBits & EEP_DIR) && (LastBits & EEP_CLK) && (LastBits & EEP_DAT))
 			return (Data & (0x80 >> BitPtr)) ? 0x10 : 0x00;
-		return 0;
+		// Ack states
+		else if ((State == 3) || (State == 5) || (State == 7) || (State == 9))
+			return 0x00;
+		// Data pin is open drain
+		else	return 0x10;
 	}
 };
 
@@ -160,6 +170,9 @@ protected:
 	uint8_t *EEP;
 	uint8_t Addr, Data;
 	uint8_t BitPtr;
+
+	static const unsigned char AddrFlip[128]; // see below
+
 public:
 	EEPROM_24C01 (void)
 	{
@@ -172,6 +185,9 @@ public:
 	}
 	virtual	int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 	{
+		uint8_t ver = 0;
+		CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 		SAVELOAD_BYTE(mode, offset, data, LastBits);
 		SAVELOAD_BYTE(mode, offset, data, State);
 		SAVELOAD_BYTE(mode, offset, data, Addr);
@@ -202,6 +218,11 @@ public:
 			break;
 
 		case 2:	// Set Address
+			// NOTE: Bandai operates this chip as if the address and data are
+			// little-endian, but it turns out they're actually big-endian.
+			// We will still treat them as little endian, though, both for
+			// compatibility with previous savestates and so that the resulting
+			// .SAV file will be intelligible if opened in a hex-editor.
 			if (Val & EEP_DAT)
 				Addr |= 1 << BitPtr;
 			BitPtr++;
@@ -239,7 +260,13 @@ public:
 			break;
 		case 6:	// Ack
 			EEP[Addr] = Data;
+			// NOTE: due to the above "little endian" treatment, we need to increment
+			// the address "backwards" so that multi-byte I/O works correctly.
+			// Fortunately, no released games ever actually did this.
+			Addr = AddrFlip[Addr];
 			Addr = (Addr & 0x7C) | ((Addr + 1) & 0x3);
+			Addr = AddrFlip[Addr];
+			BitPtr = 0;
 			Data = 0;
 			State = 5;
 			break;
@@ -252,7 +279,11 @@ public:
 			break;
 		case 8:	// Ack
 			State = 7;
+			BitPtr = 0;
+			// NOTE: See above
+			Addr = AddrFlip[Addr];
 			Addr = (Addr + 1) & 0x7F;
+			Addr = AddrFlip[Addr];
 			Data = EEP[Addr];
 			break;
 		}
@@ -266,6 +297,18 @@ public:
 		return 0;
 	}
 };
+
+const unsigned char EEPROM_24C01::AddrFlip[128] = {
+	0x00,0x40,0x20,0x60,0x10,0x50,0x30,0x70,0x08,0x48,0x28,0x68,0x18,0x58,0x38,0x78,
+	0x04,0x44,0x24,0x64,0x14,0x54,0x34,0x74,0x0C,0x4C,0x2C,0x6C,0x1C,0x5C,0x3C,0x7C,
+	0x02,0x42,0x22,0x62,0x12,0x52,0x32,0x72,0x0A,0x4A,0x2A,0x6A,0x1A,0x5A,0x3A,0x7A,
+	0x06,0x46,0x26,0x66,0x16,0x56,0x36,0x76,0x0E,0x4E,0x2E,0x6E,0x1E,0x5E,0x3E,0x7E,
+	0x01,0x41,0x21,0x61,0x11,0x51,0x31,0x71,0x09,0x49,0x29,0x69,0x19,0x59,0x39,0x79,
+	0x05,0x45,0x25,0x65,0x15,0x55,0x35,0x75,0x0D,0x4D,0x2D,0x6D,0x1D,0x5D,0x3D,0x7D,
+	0x03,0x43,0x23,0x63,0x13,0x53,0x33,0x73,0x0B,0x4B,0x2B,0x6B,0x1B,0x5B,0x3B,0x7B,
+	0x07,0x47,0x27,0x67,0x17,0x57,0x37,0x77,0x0F,0x4F,0x2F,0x6F,0x1F,0x5F,0x3F,0x7F
+};
+
 namespace
 {
 uint8_t PRG, CHR[8], Mirror;
@@ -290,14 +333,18 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_WORD(mode, offset, data, IRQcounter.s0);
 	SAVELOAD_BYTE(mode, offset, data, IRQenabled);
 	SAVELOAD_BYTE(mode, offset, data, PRG);
 	for (int i = 0; i < 8; i++)
 		SAVELOAD_BYTE(mode, offset, data, CHR[i]);
 	SAVELOAD_BYTE(mode, offset, data, Mirror);
-	offset = SaveEEPROM->SaveLoad(mode, offset, data);
-	if (mode == STATE_LOAD)
+	CheckSave(offset = SaveEEPROM->SaveLoad(mode, offset, data));
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -310,9 +357,7 @@ void	MAPINT	CPUCycle (void)
 
 int	MAPINT	Read (int Bank, int Addr)
 {
-	if ((Addr & 0xF) == 0)
-		return SaveEEPROM->Read();
-	else	return -1;
+	return SaveEEPROM->Read();
 }
 
 void	MAPINT	Write (int Bank, int Addr, int Val)
@@ -375,8 +420,8 @@ uint16_t MapperNum = 16;
 uint16_t MapperNum2 = 159;
 } // namespace
 
-const MapperInfo MapperInfo_016 =
-{
+const MapperInfo MapperInfo_016
+(
 	&MapperNum,
 	_T("Bandai + 24C02"),
 	COMPAT_FULL,
@@ -388,10 +433,9 @@ const MapperInfo MapperInfo_016 =
 	SaveLoad,
 	NULL,
 	NULL
-};
-
-const MapperInfo MapperInfo_159 =
-{
+);
+const MapperInfo MapperInfo_159
+(
 	&MapperNum2,
 	_T("Bandai + 24C01"),
 	COMPAT_FULL,
@@ -403,4 +447,4 @@ const MapperInfo MapperInfo_159 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

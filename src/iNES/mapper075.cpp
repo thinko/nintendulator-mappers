@@ -16,8 +16,8 @@ void	Sync (void)
 	EMU->SetPRG_ROM8(0xA, PRG[1]);
 	EMU->SetPRG_ROM8(0xC, PRG[2]);
 	EMU->SetPRG_ROM8(0xE, 0xF);
-	EMU->SetCHR_ROM4(0, CHR[0].b0);
-	EMU->SetCHR_ROM4(4, CHR[1].b0);
+	EMU->SetCHR_ROM4(0x0, CHR[0].b0);
+	EMU->SetCHR_ROM4(0x4, CHR[1].b0);
 	if (Mirror)
 		EMU->Mirror_H();
 	else	EMU->Mirror_V();
@@ -25,12 +25,16 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	for (int i = 0; i < 3; i++)
 		SAVELOAD_BYTE(mode, offset, data, PRG[i]);
 	for (int i = 0; i < 2; i++)
 		SAVELOAD_BYTE(mode, offset, data, CHR[i].b0);
 	SAVELOAD_BYTE(mode, offset, data, Mirror);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -92,8 +96,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 75;
 } // namespace
 
-const MapperInfo MapperInfo_075 =
-{
+const MapperInfo MapperInfo_075
+(
 	&MapperNum,
 	_T("Konami VRC1"),
 	COMPAT_FULL,
@@ -105,4 +109,4 @@ const MapperInfo MapperInfo_075 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

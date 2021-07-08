@@ -38,6 +38,9 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, IRQenabled);
 	SAVELOAD_BYTE(mode, offset, data, IRQcounter);
 	SAVELOAD_BYTE(mode, offset, data, IRQlatch);
@@ -47,8 +50,9 @@ int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 	for (int i = 0; i < 8; i++)
 		SAVELOAD_BYTE(mode, offset, data, CHR[i]);
 	SAVELOAD_BYTE(mode, offset, data, Misc);
-	offset = VRC7sound::SaveLoad(mode, offset, data);
-	if (mode == STATE_LOAD)
+	CheckSave(offset = VRC7sound::SaveLoad(mode, offset, data));
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -188,8 +192,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 85;
 } // namespace
 
-const MapperInfo MapperInfo_085 =
-{
+const MapperInfo MapperInfo_085
+(
 	&MapperNum,
 	_T("Konami VRC7"),
 	COMPAT_FULL,
@@ -201,4 +205,4 @@ const MapperInfo MapperInfo_085 =
 	SaveLoad,
 	MapperSnd,
 	NULL
-};
+);

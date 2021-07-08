@@ -15,7 +15,7 @@ void	Sync (void)
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -33,8 +33,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 66;
 } // namespace
 
-const MapperInfo MapperInfo_066 =
-{
+const MapperInfo MapperInfo_066
+(
 	&MapperNum,
 	_T("GNROM/compatible"),
 	COMPAT_FULL,
@@ -46,4 +46,4 @@ const MapperInfo MapperInfo_066 =
 	Latch::SaveLoad_D,
 	NULL,
 	NULL
-};
+);

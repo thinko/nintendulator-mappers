@@ -18,16 +18,20 @@ void	Sync (void)
 	if (Mirror)
 		EMU->Mirror_H();
 	else	EMU->Mirror_V();
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, IRQenabled);
 	SAVELOAD_WORD(mode, offset, data, IRQcounter.s0);
 	SAVELOAD_BYTE(mode, offset, data, PRG);
 	SAVELOAD_BYTE(mode, offset, data, Mirror);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -84,8 +88,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 42;
 } // namespace
 
-const MapperInfo MapperInfo_042 =
-{
+const MapperInfo MapperInfo_042
+(
 	&MapperNum,
 	_T("Mario Baby"),
 	COMPAT_FULL,
@@ -97,4 +101,4 @@ const MapperInfo MapperInfo_042 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

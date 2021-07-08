@@ -22,11 +22,15 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	for (int i = 0; i < 4; i++)
 		SAVELOAD_BYTE(mode, offset, data, PRG[i]);
 	for (int i = 0; i < 4; i++)
 		SAVELOAD_BYTE(mode, offset, data, CHR[i]);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -88,8 +92,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 246;
 } // namespace
 
-const MapperInfo MapperInfo_246 =
-{
+const MapperInfo MapperInfo_246
+(
 	&MapperNum,
 	_T("Mapper 246"),
 	COMPAT_NEARLY,
@@ -101,4 +105,4 @@ const MapperInfo MapperInfo_246 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

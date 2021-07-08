@@ -13,7 +13,7 @@ void	Sync (void)
 {
 	EMU->SetPRG_ROM16(0x8, PRG);
 	EMU->SetPRG_ROM16(0xC, -1);
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 	if (Mirror & 0x80)
 		iNES_SetMirroring();
 	else if (Mirror & 0x10)
@@ -23,9 +23,13 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, PRG);
 	SAVELOAD_BYTE(mode, offset, data, Mirror);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -61,8 +65,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 71;
 } // namespace
 
-const MapperInfo MapperInfo_071 =
-{
+const MapperInfo MapperInfo_071
+(
 	&MapperNum,
 	_T("Camerica BF9093/BF9097"),
 	COMPAT_NEARLY,
@@ -74,4 +78,4 @@ const MapperInfo MapperInfo_071 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

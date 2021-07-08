@@ -11,13 +11,17 @@ uint8_t Reg;
 void	Sync (void)
 {
 	EMU->SetPRG_ROM32(0x8, (Reg & 0x30) >> 4);
-	EMU->SetCHR_ROM8(0, Reg & 0xF);
+	EMU->SetCHR_ROM8(0x0, Reg & 0xF);
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, Reg);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -44,8 +48,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 140;
 } // namespace
 
-const MapperInfo MapperInfo_140 =
-{
+const MapperInfo MapperInfo_140
+(
 	&MapperNum,
 	_T("Mapper 140 (Bio Senshi Dan)"),
 	COMPAT_FULL,
@@ -57,4 +61,4 @@ const MapperInfo MapperInfo_140 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

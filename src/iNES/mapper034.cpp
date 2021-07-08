@@ -15,18 +15,21 @@ void	Sync_NINA (void)
 {
 	EMU->SetPRG_RAM8(0x6, 0);
 	EMU->SetPRG_ROM32(0x8, PRG);
-	EMU->SetCHR_ROM4(0, CHR[0]);
-	EMU->SetCHR_ROM4(4, CHR[1]);
+	EMU->SetCHR_ROM4(0x0, CHR[0]);
+	EMU->SetCHR_ROM4(0x4, CHR[1]);
 }
 
 void	Sync_BNROM (void)
 {
 	EMU->SetPRG_ROM32(0x8, PRG);
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, Mode);
 	SAVELOAD_BYTE(mode, offset, data, PRG);
 	if (Mode == 1)
@@ -34,7 +37,8 @@ int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 		SAVELOAD_BYTE(mode, offset, data, CHR[0]);
 		SAVELOAD_BYTE(mode, offset, data, CHR[1]);
 	}
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 	{
 		if (Mode == 1)
 			Sync_NINA();
@@ -99,8 +103,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 34;
 } // namespace
 
-const MapperInfo MapperInfo_034 =
-{
+const MapperInfo MapperInfo_034
+(
 	&MapperNum,
 	_T("BNROM/Nina-01"),
 	COMPAT_FULL,
@@ -112,4 +116,4 @@ const MapperInfo MapperInfo_034 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

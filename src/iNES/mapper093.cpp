@@ -12,8 +12,8 @@ void	Sync (void)
 	EMU->SetPRG_ROM16(0x8, (Latch::Data & 0xF0) >> 4);
 	EMU->SetPRG_ROM16(0xC, -1);
 	if (ROM->INES_CHRSize)
-		EMU->SetCHR_ROM8(0, 0);
-	else	EMU->SetCHR_RAM8(0, 0);
+		EMU->SetCHR_ROM8(0x0, 0);
+	else	EMU->SetCHR_RAM8(0x0, 0);
 	if (Latch::Data & 0x01)
 		EMU->Mirror_H();
 	else	EMU->Mirror_V();
@@ -21,7 +21,7 @@ void	Sync (void)
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -36,8 +36,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 93;
 } // namespace
 
-const MapperInfo MapperInfo_093 =
-{
+const MapperInfo MapperInfo_093
+(
 	&MapperNum,
 	_T("Fantasy Zone"),
 	COMPAT_FULL,
@@ -49,4 +49,4 @@ const MapperInfo MapperInfo_093 =
 	Latch::SaveLoad_D,
 	NULL,
 	NULL
-};
+);

@@ -11,7 +11,7 @@ void	Sync (void)
 {
 	EMU->SetPRG_ROM16(0x8, (Latch::Data & 0x70) >> 4);
 	EMU->SetPRG_ROM16(0xC, -1);
-	EMU->SetCHR_ROM8(0, Latch::Data & 0xF);
+	EMU->SetCHR_ROM8(0x0, Latch::Data & 0xF);
 	if (Latch::Data & 0x80)
 		EMU->Mirror_S1();
 	else	EMU->Mirror_S0();
@@ -19,7 +19,7 @@ void	Sync (void)
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -34,8 +34,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 152;
 } // namespace
 
-const MapperInfo MapperInfo_152 =
-{
+const MapperInfo MapperInfo_152
+(
 	&MapperNum,
 	_T("Arkanoid 2"),
 	COMPAT_FULL,
@@ -47,4 +47,4 @@ const MapperInfo MapperInfo_152 =
 	Latch::SaveLoad_D,
 	NULL,
 	NULL
-};
+);

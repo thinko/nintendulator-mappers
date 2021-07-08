@@ -12,7 +12,7 @@ FCPUWrite _Write4;
 void	Sync (void)
 {
 	EMU->SetPRG_ROM32(0x8, PRG);
-	EMU->SetCHR_ROM8(0, CHR);
+	EMU->SetCHR_ROM8(0x0, CHR);
 	switch (Mirror)
 	{
 	case 0:	EMU->Mirror_H();		break;
@@ -24,11 +24,15 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, Cmd);
 	SAVELOAD_BYTE(mode, offset, data, PRG);
 	SAVELOAD_BYTE(mode, offset, data, CHR);
 	SAVELOAD_BYTE(mode, offset, data, Mirror);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -78,8 +82,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 243;
 } // namespace
 
-const MapperInfo MapperInfo_243 =
-{
+const MapperInfo MapperInfo_243
+(
 	&MapperNum,
 	_T("Sachen (74LS374N)"),
 	COMPAT_FULL,
@@ -91,4 +95,4 @@ const MapperInfo MapperInfo_243 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

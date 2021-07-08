@@ -20,13 +20,13 @@ void	SyncCHR (void)
 
 	bank = MMC3::GetCHRBank(LatchState[0] ? 2 : 0) >> 2;
 	if (bank == 0)
-		EMU->SetCHR_RAM4(0, 0);
-	else	EMU->SetCHR_ROM4(0, bank);
+		EMU->SetCHR_RAM4(0x0, 0);
+	else	EMU->SetCHR_ROM4(0x0, bank);
 
 	bank = MMC3::GetCHRBank(LatchState[1] ? 6 : 4) >> 2;
 	if (bank == 0)
-		EMU->SetCHR_RAM4(4, 0);
-	else	EMU->SetCHR_ROM4(4, bank);
+		EMU->SetCHR_RAM4(0x4, 0);
+	else	EMU->SetCHR_ROM4(0x4, bank);
 }
 
 void	Sync (void)
@@ -39,10 +39,14 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
-	offset = MMC3::SaveLoad(mode, offset, data);
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
+	CheckSave(offset = MMC3::SaveLoad(mode, offset, data));
 	for (int i = 0; i < 2; i++)
 		SAVELOAD_BYTE(mode, offset, data, LatchState[i]);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -82,7 +86,7 @@ int	MAPINT	PPURead7 (int Bank, int Addr)
 
 BOOL	MAPINT	Load (void)
 {
-	MMC3::Load(Sync);
+	MMC3::Load(Sync, FALSE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -109,8 +113,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 165;
 } // namespace
 
-const MapperInfo MapperInfo_165 =
-{
+const MapperInfo MapperInfo_165
+(
 	&MapperNum,
 	_T("Fire Emblem"),
 	COMPAT_NEARLY,
@@ -122,4 +126,4 @@ const MapperInfo MapperInfo_165 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

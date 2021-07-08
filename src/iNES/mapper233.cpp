@@ -9,7 +9,7 @@ namespace
 {
 void	Sync (void)
 {
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 	if (Latch::Data & 0x20)
 	{
 		EMU->SetPRG_ROM16(0x8, (Latch::Data & 0x1F));
@@ -27,7 +27,7 @@ void	Sync (void)
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -42,8 +42,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 233;
 } // namespace
 
-const MapperInfo MapperInfo_233 =
-{
+const MapperInfo MapperInfo_233
+(
 	&MapperNum,
 	_T("42-in-1"),
 	COMPAT_FULL,
@@ -55,4 +55,4 @@ const MapperInfo MapperInfo_233 =
 	Latch::SaveLoad_D,
 	NULL,
 	NULL
-};
+);

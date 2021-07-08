@@ -10,7 +10,7 @@ namespace
 void	Sync (void)
 {
 	EMU->SetPRG_ROM32(0x8, Latch::Data & 0x07);
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 	if (Latch::Data & 0x10)
 		EMU->Mirror_S1();
 	else	EMU->Mirror_S0();
@@ -18,7 +18,7 @@ void	Sync (void)
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -33,8 +33,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 7;
 } // namespace
 
-const MapperInfo MapperInfo_007 =
-{
+const MapperInfo MapperInfo_007
+(
 	&MapperNum,
 	_T("AOROM"),
 	COMPAT_FULL,
@@ -46,4 +46,4 @@ const MapperInfo MapperInfo_007 =
 	Latch::SaveLoad_D,
 	NULL,
 	NULL
-};
+);

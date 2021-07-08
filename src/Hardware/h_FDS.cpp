@@ -27,6 +27,9 @@ uint8_t ConfigCmd;
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, DiskNum);
 	SAVELOAD_WORD(mode, offset, data, IRQcounter);
 	SAVELOAD_WORD(mode, offset, data, IRQlatch.s0);
@@ -38,8 +41,9 @@ int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 	SAVELOAD_BYTE(mode, offset, data, WriteSkip);
 	SAVELOAD_BYTE(mode, offset, data, DiskIRQ);
 	SAVELOAD_BYTE(mode, offset, data, Mirror);
-	offset = FDSsound::SaveLoad(mode, offset, data);
-	if (mode == STATE_LOAD)
+	CheckSave(offset = FDSsound::SaveLoad(mode, offset, data));
+
+	if (IsLoad(mode))
 	{
 		if (Mirror)
 			EMU->Mirror_H();
@@ -315,7 +319,7 @@ void	Reset (RESET_TYPE ResetType)
 	EMU->SetCPUWriteHandler(0x4, Write);
 
 	EMU->SetPRG_RAM32(0x6, 0);
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 
 	EMU->SetPRG_Ptr4(0xE, FDS_BIOS[0], FALSE);
 	EMU->SetPRG_Ptr4(0xF, FDS_BIOS[1], FALSE);

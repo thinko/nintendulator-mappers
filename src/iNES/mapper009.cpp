@@ -16,7 +16,7 @@ void	Sync (void)
 
 BOOL	MAPINT	Load (void)
 {
-	MMC2::Load(Sync);
+	MMC2::Load(Sync, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -32,8 +32,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 9;
 } // namespace
 
-const MapperInfo MapperInfo_009 =
-{
+const MapperInfo MapperInfo_009
+(
 	&MapperNum,
 	_T("MMC2"),
 	COMPAT_FULL,
@@ -45,4 +45,4 @@ const MapperInfo MapperInfo_009 =
 	MMC2::SaveLoad,
 	NULL,
 	NULL
-};
+);

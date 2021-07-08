@@ -16,16 +16,20 @@ void	Sync (void)
 	EMU->SetPRG_RAM8(0x6, 0);
 	EMU->SetPRG_ROM16(0x8, PRG);
 	EMU->SetPRG_ROM16(0xC, -1);
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, IRQenabled);
 	SAVELOAD_WORD(mode, offset, data, IRQcounter);
 	SAVELOAD_WORD(mode, offset, data, IRQlatch.s0);
 	SAVELOAD_BYTE(mode, offset, data, PRG);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -105,8 +109,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 73;
 } // namespace
 
-const MapperInfo MapperInfo_073 =
-{
+const MapperInfo MapperInfo_073
+(
 	&MapperNum,
 	_T("Konami VRC3"),
 	COMPAT_FULL,
@@ -118,4 +122,4 @@ const MapperInfo MapperInfo_073 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

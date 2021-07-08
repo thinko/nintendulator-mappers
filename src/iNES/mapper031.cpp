@@ -16,9 +16,13 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	for (int i = 0; i < 8; i++)
 		SAVELOAD_BYTE(mode, offset, data, PRG[i]);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -40,8 +44,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 	iNES_SetMirroring();
 
 	if (ROM->INES_CHRSize)
-		EMU->SetCHR_ROM8(0, 0);
-	else	EMU->SetCHR_RAM8(0, 0);
+		EMU->SetCHR_ROM8(0x0, 0);
+	else	EMU->SetCHR_RAM8(0x0, 0);
 
 	EMU->SetCPUWriteHandler(0x5, Write);
 
@@ -53,8 +57,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 31;
 } // namespace
 
-const MapperInfo MapperInfo_031 =
-{
+const MapperInfo MapperInfo_031
+(
 	&MapperNum,
 	_T("2A03 Puritans Album"),
 	COMPAT_FULL,
@@ -66,4 +70,4 @@ const MapperInfo MapperInfo_031 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

@@ -77,7 +77,7 @@ void	Sync (void)
 {
 	EMU->SetPRG_ROM32(0x8, 0);
 	if ((Latch::Data & 0x0F) && (Latch::Data != 0x13))
-		EMU->SetCHR_ROM8(0, 0);
+		EMU->SetCHR_ROM8(0x0, 0);
 	else
 	{
 		for (int i = 0; i < 8; i++)
@@ -87,7 +87,7 @@ void	Sync (void)
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -103,8 +103,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 185;
 } // namespace
 
-const MapperInfo MapperInfo_185 =
-{
+const MapperInfo MapperInfo_185
+(
 	&MapperNum,
 	_T("CNROM with CHR disable"),
 	COMPAT_NEARLY,
@@ -116,4 +116,4 @@ const MapperInfo MapperInfo_185 =
 	Latch::SaveLoad_D,
 	NULL,
 	NULL
-};
+);

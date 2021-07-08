@@ -25,13 +25,13 @@ void	Sync_FKROM (void)
 BOOL	MAPINT	Load_FJROM (void)
 {
 	UNIF_SetSRAM(8192);
-	MMC4::Load(Sync_FJROM);
+	MMC4::Load(Sync_FJROM, TRUE);
 	return TRUE;
 }
 BOOL	MAPINT	Load_FKROM (void)
 {
 	UNIF_SetSRAM(8192);
-	MMC4::Load(Sync_FKROM);
+	MMC4::Load(Sync_FKROM, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -44,8 +44,8 @@ void	MAPINT	Unload (void)
 }
 } // namespace
 
-const MapperInfo MapperInfo_NES_FJROM =
-{
+const MapperInfo MapperInfo_NES_FJROM
+(
 	"NES-FJROM",
 	_T("MMC4"),
 	COMPAT_FULL,
@@ -57,9 +57,9 @@ const MapperInfo MapperInfo_NES_FJROM =
 	MMC4::SaveLoad,
 	NULL,
 	NULL
-};
-const MapperInfo MapperInfo_NES_FKROM =
-{
+);
+const MapperInfo MapperInfo_NES_FKROM
+(
 	"NES-FKROM",
 	_T("MMC4"),
 	COMPAT_FULL,
@@ -71,4 +71,4 @@ const MapperInfo MapperInfo_NES_FKROM =
 	MMC4::SaveLoad,
 	NULL,
 	NULL
-};
+);

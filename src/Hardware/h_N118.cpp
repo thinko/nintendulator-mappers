@@ -10,10 +10,12 @@ uint8_t Cmd;
 uint8_t PRG[2];
 uint8_t CHR[6];
 FSync Sync;
+BOOL SyncOnLoad;
 
-void	Load (FSync _Sync)
+void	Load (FSync _Sync, BOOL _SyncOnLoad)
 {
 	Sync = _Sync;
+	SyncOnLoad = _SyncOnLoad;
 }
 void	Reset (RESET_TYPE ResetType)
 {
@@ -43,22 +45,50 @@ void	SyncPRG (void)
 
 void	SyncCHR (void)
 {
-	EMU->SetCHR_ROM2(0, CHR[0] >> 1);
-	EMU->SetCHR_ROM2(2, CHR[1] >> 1);
-	EMU->SetCHR_ROM1(4, CHR[2]);
-	EMU->SetCHR_ROM1(5, CHR[3]);
-	EMU->SetCHR_ROM1(6, CHR[4]);
-	EMU->SetCHR_ROM1(7, CHR[5]);
+	EMU->SetCHR_ROM2(0x0, CHR[0] >> 1);
+	EMU->SetCHR_ROM2(0x2, CHR[1] >> 1);
+	EMU->SetCHR_ROM1(0x4, CHR[2]);
+	EMU->SetCHR_ROM1(0x5, CHR[3]);
+	EMU->SetCHR_ROM1(0x6, CHR[4]);
+	EMU->SetCHR_ROM1(0x7, CHR[5]);
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, Cmd);
 	for (int i = 0; i < 2; i++)
 		SAVELOAD_BYTE(mode, offset, data, PRG[i]);
 	for (int i = 0; i < 6; i++)
 		SAVELOAD_BYTE(mode, offset, data, CHR[i]);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode) && SyncOnLoad)
+		Sync();
+	return offset;
+}
+
+// Alternate version, originally used by "N108" module in NES_DxROM
+// It stored pre-shifted values for CHR banks 0 and 1 and was thus
+// incompatible with the above code.
+int	MAPINT	SaveLoad_Alt (STATE_TYPE mode, int offset, unsigned char *data)
+{
+	uint8_t ver = 1;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
+	SAVELOAD_BYTE(mode, offset, data, Cmd);
+	for (int i = 0; i < 2; i++)
+		SAVELOAD_BYTE(mode, offset, data, PRG[i]);
+	for (int i = 0; i < 6; i++)
+		SAVELOAD_BYTE(mode, offset, data, CHR[i]);
+	if (IsLoad(mode) && (ver == 0))
+	{
+		CHR[0] <<= 1;
+		CHR[1] <<= 1;
+	}
+
+	if (IsLoad(mode) && SyncOnLoad)
 		Sync();
 	return offset;
 }

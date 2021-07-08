@@ -9,14 +9,14 @@ namespace
 {
 void	Sync (void)
 {
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 	EMU->SetPRG_RAM8(0x6, 0);
 	EMU->SetPRG_ROM32(0x8, Latch::Data & 0x1F);
 }
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -30,8 +30,8 @@ void	MAPINT	Unload (void)
 }
 } // namespace
 
-const MapperInfo MapperInfo_BMC_StudyGame32in1 =
-{
+const MapperInfo MapperInfo_BMC_StudyGame32in1
+(
 	"BMC-StudyGame32in1",
 	_T("Pirate multicart mapper"),
 	COMPAT_FULL,
@@ -43,4 +43,4 @@ const MapperInfo MapperInfo_BMC_StudyGame32in1 =
 	Latch::SaveLoad_D,
 	NULL,
 	NULL
-};
+);

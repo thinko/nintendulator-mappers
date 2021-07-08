@@ -43,6 +43,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\interface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\Hardware\h_FME7.cpp">
       <Filter>Source Files\Hardware Source Files</Filter>
     </ClCompile>
@@ -62,6 +65,9 @@
       <Filter>Source Files\Hardware Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Hardware\h_MMC5.cpp">
+      <Filter>Source Files\Hardware Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Hardware\h_MMC6.cpp">
       <Filter>Source Files\Hardware Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Hardware\h_N118.cpp">
@@ -466,6 +472,9 @@
     <ClCompile Include="..\src\iNES\mapper207.cpp">
       <Filter>Source Files\Mapper Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\iNES\mapper218.cpp">
+      <Filter>Source Files\Mapper Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\iNES\mapper225.cpp">
       <Filter>Source Files\Mapper Source Files</Filter>
     </ClCompile>
@@ -520,9 +529,6 @@
     <ClCompile Include="..\src\iNES\mapper254.cpp">
       <Filter>Source Files\Mapper Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\iNES\unimplemented.cpp">
-      <Filter>Source Files\Mapper Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\DLL\d_iNES.cpp">
       <Filter>Source Files\DLL Source Files</Filter>
     </ClCompile>
@@ -536,6 +542,9 @@
       <Filter>Source Files\Mapper Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\iNES\mapper206.cpp">
+      <Filter>Source Files\Mapper Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\iNES\mapper031.cpp">
       <Filter>Source Files\Mapper Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -562,6 +571,9 @@
       <Filter>Header Files\Hardware Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Hardware\h_MMC5.h">
+      <Filter>Header Files\Hardware Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Hardware\h_MMC6.h">
       <Filter>Header Files\Hardware Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Hardware\h_N118.h">

@@ -19,17 +19,21 @@ void	Sync (void)
 	if (Mirror)
 		EMU->Mirror_H();
 	else	EMU->Mirror_V();
-	EMU->SetCHR_ROM8(0, CHR);
+	EMU->SetCHR_ROM8(0x0, CHR);
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, IRQenabled);
 	SAVELOAD_WORD(mode, offset, data, IRQcounter.s0);
 	SAVELOAD_BYTE(mode, offset, data, PRG);
 	SAVELOAD_BYTE(mode, offset, data, CHR);
 	SAVELOAD_BYTE(mode, offset, data, Mirror);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -88,8 +92,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 254;
 } // namespace
 
-const MapperInfo MapperInfo_254 =
-{
+const MapperInfo MapperInfo_254
+(
 	&MapperNum,
 	_T("Ai Senshi Nicol (Pirate)"),
 	COMPAT_FULL,
@@ -101,4 +105,4 @@ const MapperInfo MapperInfo_254 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

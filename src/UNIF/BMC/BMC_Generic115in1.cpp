@@ -26,7 +26,7 @@ void	Sync (void)
 		uint16_t addr;
 	};
 	addr = Latch::Addr.s0;
-	EMU->SetCHR_ROM8(0, CHRbank);
+	EMU->SetCHR_ROM8(0x0, CHRbank);
 	if (PRGsize)
 	{
 		EMU->SetPRG_ROM16(0x8, (PRGchip << 6) | (PRGbank << 1) | (PRG16));
@@ -40,10 +40,14 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
-	offset = Latch::SaveLoad_A(mode, offset, data);
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
+	CheckSave(offset = Latch::SaveLoad_A(mode, offset, data));
 	for (int i = 0; i < 4; i++)
 		SAVELOAD_BYTE(mode, offset, data, Regs[i]);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -63,7 +67,7 @@ void	MAPINT	Write (int Bank, int Addr, int Val)
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, FALSE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -83,8 +87,8 @@ void	MAPINT	Unload (void)
 }
 } // namespace
 
-const MapperInfo MapperInfo_BMC_Generic115in1 =
-{
+const MapperInfo MapperInfo_BMC_Generic115in1
+(
 	"BMC-Generic115in1",
 	_T("Pirate multicart mapper"),
 	COMPAT_FULL,
@@ -96,4 +100,4 @@ const MapperInfo MapperInfo_BMC_Generic115in1 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

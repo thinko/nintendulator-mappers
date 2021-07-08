@@ -56,7 +56,7 @@ void	Sync (void)
 	{
 		if (!(Reg0 & 0x80))
 			CHRbank |= Reg2 & 0x80;
-		EMU->SetCHR_ROM8(0, (Reg2 & 0xF) | (CHRbank >> 3));
+		EMU->SetCHR_ROM8(0x0, (Reg2 & 0xF) | (CHRbank >> 3));
 	}
 	else	MMC3::SyncCHR_ROM(CHRmask, CHRbank);
 	MMC3::SyncMirror();
@@ -64,12 +64,16 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
-	offset = MMC3::SaveLoad(mode, offset, data);
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
+	CheckSave(offset = MMC3::SaveLoad(mode, offset, data));
 	SAVELOAD_BYTE(mode, offset, data, Reg0);
 	SAVELOAD_BYTE(mode, offset, data, Reg1);
 	SAVELOAD_BYTE(mode, offset, data, Reg2);
 	SAVELOAD_BYTE(mode, offset, data, Reg3);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -92,7 +96,7 @@ void	MAPINT	Write (int Bank, int Addr, int Val)
 
 BOOL	MAPINT	Load (void)
 {
-	MMC3::Load(Sync);
+	MMC3::Load(Sync, FALSE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -112,8 +116,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 126;
 } // namespace
 
-const MapperInfo MapperInfo_126 =
-{
+const MapperInfo MapperInfo_126
+(
 	&MapperNum,
 	_T("Super Joy (MMC3)"),
 	COMPAT_FULL,
@@ -125,4 +129,4 @@ const MapperInfo MapperInfo_126 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

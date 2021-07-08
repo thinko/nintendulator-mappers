@@ -14,17 +14,21 @@ void	Sync (void)
 	EMU->SetPRG_ROM8(0x8, PRG);
 	EMU->SetPRG_ROM8(0xA, -3);
 	EMU->SetPRG_ROM16(0xC, -1);
-	EMU->SetCHR_ROM4(0, CHR[0] >> 2);
-	EMU->SetCHR_ROM2(4, CHR[1] >> 1);
-	EMU->SetCHR_ROM2(6, CHR[2] >> 1);
+	EMU->SetCHR_ROM4(0x0, CHR[0] >> 2);
+	EMU->SetCHR_ROM2(0x4, CHR[1] >> 1);
+	EMU->SetCHR_ROM2(0x6, CHR[2] >> 1);
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, PRG);
 	for (int i = 0; i < 3; i++)
 		SAVELOAD_BYTE(mode, offset, data, CHR[i]);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -59,8 +63,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 193;
 } // namespace
 
-const MapperInfo MapperInfo_193 =
-{
+const MapperInfo MapperInfo_193
+(
 	&MapperNum,
 	_T("Fighting Hero"),
 	COMPAT_NEARLY,
@@ -72,4 +76,4 @@ const MapperInfo MapperInfo_193 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

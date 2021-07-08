@@ -10,7 +10,7 @@ uint8_t Reg0, Reg1;
 
 void	Sync (void)
 {
-	EMU->SetCHR_ROM8(0, Reg1 & 0x7);
+	EMU->SetCHR_ROM8(0x0, Reg1 & 0x7);
 	if (Reg0 & 0x08)
 	{
 		EMU->SetPRG_ROM16(0x8, Reg0 & 0x7);
@@ -24,9 +24,13 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, Reg0);
 	SAVELOAD_BYTE(mode, offset, data, Reg1);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -51,8 +55,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 }
 } // namespace
 
-const MapperInfo MapperInfo_BMC_WS =
-{
+const MapperInfo MapperInfo_BMC_WS
+(
 	"BMC-WS",
 	_T("Pirate multicart mapper"),
 	COMPAT_FULL,
@@ -64,4 +68,4 @@ const MapperInfo MapperInfo_BMC_WS =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

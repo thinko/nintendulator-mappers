@@ -18,7 +18,7 @@ void	Sync (void)
 		EMU->SetPRG_ROM16(0xC, ((Game & 0xF) << 3) | 0x7);
 	}
 	else	EMU->SetPRG_ROM32(0x8, 0x40); /* the EPROM at the end */
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 	if (Game & 0x20)
 		EMU->Mirror_H();
 	else	EMU->Mirror_V();
@@ -26,9 +26,13 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
-	offset = Latch::SaveLoad_D(mode, offset, data);
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
+	CheckSave(offset = Latch::SaveLoad_D(mode, offset, data));
 	SAVELOAD_BYTE(mode, offset, data, Game);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -43,7 +47,7 @@ void	MAPINT	Write (int Bank, int Addr, int Val)
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, FALSE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -60,8 +64,8 @@ void	MAPINT	Unload (void)
 }
 } // namespace
 
-const MapperInfo MapperInfo_BMC_Supervision16in1 =
-{
+const MapperInfo MapperInfo_BMC_Supervision16in1
+(
 	"BMC-Supervision16in1",
 	_T("Pirate multicart mapper"),
 	COMPAT_FULL,
@@ -73,4 +77,4 @@ const MapperInfo MapperInfo_BMC_Supervision16in1 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

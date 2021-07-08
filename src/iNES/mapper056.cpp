@@ -18,7 +18,7 @@ void	Sync (void)
 {
 	EMU->SetPRG_RAM8(0x6, 0);
 	for (int i = 0; i < 3; i++)
-		EMU->SetPRG_ROM8(8 | (i << 1), PRG[i].b0);
+		EMU->SetPRG_ROM8(0x8 | (i << 1), PRG[i].b0);
 	EMU->SetPRG_ROM8(0xE, -1);
 	if (Mirror)
 		EMU->Mirror_V();
@@ -29,6 +29,9 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, PRGcontrol);
 	for (int i = 0; i < 4; i++)
 		SAVELOAD_BYTE(mode, offset, data, PRG[i].b0);
@@ -38,7 +41,8 @@ int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 	SAVELOAD_WORD(mode, offset, data, IRQcounter);
 	SAVELOAD_WORD(mode, offset, data, IRQlatch.s0);
 	SAVELOAD_BYTE(mode, offset, data, IRQenabled);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -132,8 +136,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 56;
 } // namespace
 
-const MapperInfo MapperInfo_056 =
-{
+const MapperInfo MapperInfo_056
+(
 	&MapperNum,
 	_T("SMB3 Pirate"),
 	COMPAT_FULL,
@@ -145,4 +149,4 @@ const MapperInfo MapperInfo_056 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

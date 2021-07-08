@@ -10,12 +10,12 @@ namespace
 void	Sync (void)
 {
 	EMU->SetPRG_ROM32(0x8, (Latch::Data & 0xFE) >> 1);
-	EMU->SetCHR_ROM8(0, Latch::Data & 0xFF);
+	EMU->SetCHR_ROM8(0x0, Latch::Data & 0xFF);
 }
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -31,8 +31,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 107;
 } // namespace
 
-const MapperInfo MapperInfo_107 =
-{
+const MapperInfo MapperInfo_107
+(
 	&MapperNum,
 	_T("Magic Dragon"),
 	COMPAT_NEARLY,
@@ -44,4 +44,4 @@ const MapperInfo MapperInfo_107 =
 	Latch::SaveLoad_D,
 	NULL,
 	NULL
-};
+);

@@ -10,12 +10,12 @@ namespace
 void	Sync_GNROM (void)
 {
 	EMU->SetPRG_ROM32(0x8, (Latch::Data >> 4) & 0x3);
-	EMU->SetCHR_ROM8(0, (Latch::Data >> 0) & 0x3);
+	EMU->SetCHR_ROM8(0x0, (Latch::Data >> 0) & 0x3);
 }
 
 BOOL	MAPINT	Load_GNROM (void)
 {
-	Latch::Load(Sync_GNROM, TRUE);
+	Latch::Load(Sync_GNROM, TRUE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -29,8 +29,8 @@ void	MAPINT	Unload (void)
 }
 } // namespace
 
-const MapperInfo MapperInfo_NES_GNROM =
-{
+const MapperInfo MapperInfo_NES_GNROM
+(
 	"NES-GNROM",
 	_T("Standard 32KB PRG/8KB CHR switch"),
 	COMPAT_FULL,
@@ -42,4 +42,4 @@ const MapperInfo MapperInfo_NES_GNROM =
 	Latch::SaveLoad_D,
 	NULL,
 	NULL
-};
+);

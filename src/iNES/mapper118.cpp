@@ -24,7 +24,7 @@ void	Sync (void)
 
 BOOL	MAPINT	Load (void)
 {
-	MMC3::Load(Sync);
+	MMC3::Load(Sync, TRUE);
 	iNES_SetSRAM();
 	return TRUE;
 }
@@ -40,8 +40,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 118;
 } // namespace
 
-const MapperInfo MapperInfo_118 =
-{
+const MapperInfo MapperInfo_118
+(
 	&MapperNum,
 	_T("TKSROM/TLSROM (MMC3)"),
 	COMPAT_FULL,
@@ -53,4 +53,4 @@ const MapperInfo MapperInfo_118 =
 	MMC3::SaveLoad,
 	NULL,
 	NULL
-};
+);

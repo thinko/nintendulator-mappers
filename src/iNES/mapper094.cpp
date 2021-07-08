@@ -11,12 +11,12 @@ void	Sync (void)
 {
 	EMU->SetPRG_ROM16(0x8, (Latch::Data & 0x1C) >> 2);
 	EMU->SetPRG_ROM16(0xC, -1);
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 }
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -32,8 +32,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 94;
 } // namespace
 
-const MapperInfo MapperInfo_094 =
-{
+const MapperInfo MapperInfo_094
+(
 	&MapperNum,
 	_T("Senjou no Ookami"),
 	COMPAT_FULL,
@@ -45,4 +45,4 @@ const MapperInfo MapperInfo_094 =
 	Latch::SaveLoad_D,
 	NULL,
 	NULL
-};
+);

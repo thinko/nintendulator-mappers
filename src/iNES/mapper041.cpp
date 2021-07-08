@@ -14,14 +14,18 @@ void	Sync (void)
 		EMU->Mirror_H();
 	else	EMU->Mirror_V();
 	EMU->SetPRG_ROM32(0x8, Reg0 & 0x7);
-	EMU->SetCHR_ROM8(0, Reg1 | ((Reg0 >> 1) & 0xC));
+	EMU->SetCHR_ROM8(0x0, Reg1 | ((Reg0 >> 1) & 0xC));
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, Reg0);
 	SAVELOAD_BYTE(mode, offset, data, Reg1);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -56,8 +60,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 41;
 } // namespace
 
-const MapperInfo MapperInfo_041 =
-{
+const MapperInfo MapperInfo_041
+(
 	&MapperNum,
 	_T("Caltron 6-in-1"),
 	COMPAT_FULL,
@@ -69,4 +73,4 @@ const MapperInfo MapperInfo_041 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

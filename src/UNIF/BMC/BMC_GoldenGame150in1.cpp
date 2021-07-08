@@ -61,7 +61,7 @@ void	Sync (void)
 		}
 		else	EMU->SetPRG_ROM32(0x8, (PRGchip << 5) | PRGbank);
 	}
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 	if (Mir_S0)
 		EMU->Mirror_S0();
 	else if (Mir_HV)
@@ -71,7 +71,7 @@ void	Sync (void)
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -84,8 +84,8 @@ void	MAPINT	Unload (void)
 }
 } // namespace
 
-const MapperInfo MapperInfo_BMC_GoldenGame150in1 =
-{
+const MapperInfo MapperInfo_BMC_GoldenGame150in1
+(
 	"BMC-GoldenGame150in1",
 	_T("Pirate multicart mapper"),
 	COMPAT_FULL,
@@ -97,4 +97,4 @@ const MapperInfo MapperInfo_BMC_GoldenGame150in1 =
 	Latch::SaveLoad_A,
 	NULL,
 	NULL
-};
+);

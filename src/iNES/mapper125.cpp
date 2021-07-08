@@ -15,13 +15,17 @@ void	Sync (void)
 	EMU->SetPRG_ROM8(0xA, 0xD);
 	EMU->SetPRG_RAM8(0xC, 0);
 	EMU->SetPRG_ROM8(0xE, 0xF);
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, PRG);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -48,8 +52,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 125;
 } // namespace
 
-const MapperInfo MapperInfo_125 =
-{
+const MapperInfo MapperInfo_125
+(
 	&MapperNum,
 	_T("Monty on the Run (FDS hack)"),
 	COMPAT_FULL,
@@ -61,4 +65,4 @@ const MapperInfo MapperInfo_125 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

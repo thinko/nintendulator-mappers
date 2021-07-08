@@ -17,8 +17,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 
 	EMU->SetPRG_ROM32(0x8, 0);
 	if (ROM->INES_CHRSize)
-		EMU->SetCHR_ROM8(0, 0);
-	else	EMU->SetCHR_RAM8(0, 0);
+		EMU->SetCHR_ROM8(0x0, 0);
+	else	EMU->SetCHR_RAM8(0x0, 0);
 	
 	// a few carts, like Family Basic, are effectively NROM with battery-backed RAM
 	if (ROM->INES_Flags & 0x02)
@@ -28,8 +28,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 0;
 } // namespace
 
-const MapperInfo MapperInfo_000 =
-{
+const MapperInfo MapperInfo_000
+(
 	&MapperNum,
 	_T("NROM"),
 	COMPAT_FULL,
@@ -41,4 +41,4 @@ const MapperInfo MapperInfo_000 =
 	NULL,
 	NULL,
 	NULL
-};
+);

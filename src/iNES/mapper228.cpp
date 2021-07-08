@@ -50,12 +50,12 @@ void	Sync (void)
 		}
 		else EMU->SetPRG_ROM32(0x8, (PRGchip << 4) | (PRGbank));
 	}
-	EMU->SetCHR_ROM8(0, (CHRbank << 2) | (Latch::Data & 0x3));
+	EMU->SetCHR_ROM8(0x0, (CHRbank << 2) | (Latch::Data & 0x3));
 }
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -70,8 +70,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 228;
 } // namespace
 
-const MapperInfo MapperInfo_228 =
-{
+const MapperInfo MapperInfo_228
+(
 	&MapperNum,
 	_T("Action 52"),
 	COMPAT_FULL,
@@ -83,4 +83,4 @@ const MapperInfo MapperInfo_228 =
 	Latch::SaveLoad_AD,
 	NULL,
 	NULL
-};
+);

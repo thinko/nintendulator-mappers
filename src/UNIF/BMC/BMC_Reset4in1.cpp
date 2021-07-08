@@ -10,15 +10,19 @@ uint8_t Game;
 
 void	Sync (void)
 {
-	EMU->SetCHR_ROM8(0, Game);
+	EMU->SetCHR_ROM8(0x0, Game);
 	EMU->SetPRG_ROM16(0x8, Game);
 	EMU->SetPRG_ROM16(0xC, Game);
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, Game);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -33,8 +37,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 }
 } // namespace
 
-const MapperInfo MapperInfo_BMC_Reset4in1 =
-{
+const MapperInfo MapperInfo_BMC_Reset4in1
+(
 	"BMC-Reset4in1",
 	_T("Pirate multicart mapper"),
 	COMPAT_FULL,
@@ -46,4 +50,4 @@ const MapperInfo MapperInfo_BMC_Reset4in1 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

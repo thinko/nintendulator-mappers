@@ -12,13 +12,17 @@ void	Sync (void)
 {
 	const unsigned char lut[4] = {0x00,0x02,0x01,0x03};
 	EMU->SetPRG_ROM32(0x8, 0);
-	EMU->SetCHR_ROM8(0, lut[Reg & 0x3]);
+	EMU->SetCHR_ROM8(0x0, lut[Reg & 0x3]);
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, Reg);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -45,8 +49,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 87;
 } // namespace
 
-const MapperInfo MapperInfo_087 =
-{
+const MapperInfo MapperInfo_087
+(
 	&MapperNum,
 	_T("Jaleco 74138/7474"),
 	COMPAT_FULL,
@@ -58,4 +62,4 @@ const MapperInfo MapperInfo_087 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

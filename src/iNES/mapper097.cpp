@@ -11,7 +11,7 @@ void	Sync (void)
 {
 	EMU->SetPRG_ROM16(0x8, -1);
 	EMU->SetPRG_ROM16(0xC, Latch::Data & 0xF);
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 	switch ((Latch::Data & 0xC0) >> 6)
 	{
 	case 0:	EMU->Mirror_S0();	break;
@@ -23,7 +23,7 @@ void	Sync (void)
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -38,8 +38,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 97;
 } // namespace
 
-const MapperInfo MapperInfo_097 =
-{
+const MapperInfo MapperInfo_097
+(
 	&MapperNum,
 	_T("Kaiketsu Yanchamaru"),
 	COMPAT_FULL,
@@ -51,4 +51,4 @@ const MapperInfo MapperInfo_097 =
 	Latch::SaveLoad_D,
 	NULL,
 	NULL
-};
+);

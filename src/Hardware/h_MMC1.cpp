@@ -9,10 +9,12 @@ namespace MMC1
 uint8_t Latch, LatchPos;
 uint8_t Regs[4];
 FSync Sync;
+BOOL SyncOnLoad;
 
-void	Load (FSync _Sync)
+void	Load (FSync _Sync, BOOL _SyncOnLoad)
 {
 	Sync = _Sync;
+	SyncOnLoad = _SyncOnLoad;
 }
 
 void	Reset (RESET_TYPE ResetType)
@@ -37,11 +39,15 @@ void	Unload (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	for (int i = 0; i < 4; i++)
 		SAVELOAD_BYTE(mode, offset, data, Regs[i]);
 	SAVELOAD_BYTE(mode, offset, data, Latch);
 	SAVELOAD_BYTE(mode, offset, data, LatchPos);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode) && SyncOnLoad)
 		Sync();
 	return offset;
 }
@@ -126,14 +132,14 @@ void	SyncPRG (int AND, int OR)
 
 void	SyncCHR_ROM (int AND, int OR)
 {
-	EMU->SetCHR_ROM4(0, (GetCHRBankLo() & AND) | OR);
-	EMU->SetCHR_ROM4(4, (GetCHRBankHi() & AND) | OR);
+	EMU->SetCHR_ROM4(0x0, (GetCHRBankLo() & AND) | OR);
+	EMU->SetCHR_ROM4(0x4, (GetCHRBankHi() & AND) | OR);
 }
 
 void	SyncCHR_RAM (int AND, int OR)
 {
-	EMU->SetCHR_RAM4(0, (GetCHRBankLo() & AND) | OR);
-	EMU->SetCHR_RAM4(4, (GetCHRBankHi() & AND) | OR);
+	EMU->SetCHR_RAM4(0x0, (GetCHRBankLo() & AND) | OR);
+	EMU->SetCHR_RAM4(0x4, (GetCHRBankHi() & AND) | OR);
 }
 
 void	SyncWRAM (void)

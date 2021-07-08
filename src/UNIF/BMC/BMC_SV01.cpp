@@ -9,7 +9,7 @@ namespace
 {
 void	Sync (void)
 {
-	EMU->SetCHR_ROM8(0, Latch::Addr.b0 & 0x07);
+	EMU->SetCHR_ROM8(0x0, Latch::Addr.b0 & 0x07);
 	if (Latch::Addr.b0 & 0x40)
 	{
 		EMU->SetPRG_ROM16(0x8, (Latch::Addr.b0 & 0x38) >> 3);
@@ -23,7 +23,7 @@ void	Sync (void)
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -36,8 +36,8 @@ void	MAPINT	Unload (void)
 }
 } // namespace
 
-const MapperInfo MapperInfo_BMC_SV01 =
-{
+const MapperInfo MapperInfo_BMC_SV01
+(
 	"BMC-SV01",
 	_T("Pirate multicart mapper"),
 	COMPAT_FULL,
@@ -49,4 +49,4 @@ const MapperInfo MapperInfo_BMC_SV01 =
 	Latch::SaveLoad_AL,
 	NULL,
 	NULL
-};
+);

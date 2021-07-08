@@ -17,21 +17,25 @@ void	Sync (void)
 	if (Reg1 & 0x40)
 	{
 		EMU->SetPRG_ROM32(0x8, (Reg1 & 0x0E) | (Reg2 & 0x01));
-		EMU->SetCHR_ROM8(0, ((Reg1 & 0x0E) << 2) | ((Reg2 & 0x70) >> 4));
+		EMU->SetCHR_ROM8(0x0, ((Reg1 & 0x0E) << 2) | ((Reg2 & 0x70) >> 4));
 	}
 	else
 	{
 		EMU->SetPRG_ROM32(0x8, Reg1 & 0x0F);
-		EMU->SetCHR_ROM8(0, ((Reg1 & 0x0F) << 2) | ((Reg2 & 0x30) >> 4));
+		EMU->SetCHR_ROM8(0x0, ((Reg1 & 0x0F) << 2) | ((Reg2 & 0x30) >> 4));
 	}
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, Reg1);
 	SAVELOAD_BYTE(mode, offset, data, Reg2);
 	SAVELOAD_BYTE(mode, offset, data, Reg3);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -95,8 +99,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 234;
 } // namespace
 
-const MapperInfo MapperInfo_234 =
-{
+const MapperInfo MapperInfo_234
+(
 	&MapperNum,
 	_T("Maxi 15"),
 	COMPAT_FULL,
@@ -108,4 +112,4 @@ const MapperInfo MapperInfo_234 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

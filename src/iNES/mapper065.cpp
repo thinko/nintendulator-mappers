@@ -17,7 +17,7 @@ void	Sync (void)
 {
 	EMU->SetPRG_RAM8(0x6, 0);
 	for (int i = 0; i < 3; i++)
-		EMU->SetPRG_ROM8(8 | (i << 1), PRG[i]);
+		EMU->SetPRG_ROM8(0x8 | (i << 1), PRG[i]);
 	EMU->SetPRG_ROM8(0xE, -1);
 	for (int i = 0; i < 8; i++)
 		EMU->SetCHR_ROM1(i, CHR[i]);
@@ -28,6 +28,9 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, IRQenabled);
 	SAVELOAD_WORD(mode, offset, data, IRQcounter);
 	SAVELOAD_WORD(mode, offset, data, IRQlatch.s0);
@@ -36,7 +39,8 @@ int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 	for (int i = 0; i < 8; i++)
 		SAVELOAD_BYTE(mode, offset, data, CHR[i]);
 	SAVELOAD_BYTE(mode, offset, data, Mirror);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -132,8 +136,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 65;
 } // namespace
 
-const MapperInfo MapperInfo_065 =
-{
+const MapperInfo MapperInfo_065
+(
 	&MapperNum,
 	_T("Irem H-3001"),
 	COMPAT_FULL,
@@ -145,4 +149,4 @@ const MapperInfo MapperInfo_065 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

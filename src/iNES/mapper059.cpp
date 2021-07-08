@@ -15,7 +15,7 @@ uint8_t JumperData[0x1000];
 
 void	Sync (void)
 {
-	EMU->SetCHR_ROM8(0, Latch::Addr.s0 & 0x07);
+	EMU->SetCHR_ROM8(0x0, Latch::Addr.s0 & 0x07);
 	EMU->SetPRG_ROM32(0x8, (Latch::Addr.s0 & 0x70) >> 4);
 	if (Latch::Addr.s0 & 0x08)
 		EMU->Mirror_H();
@@ -30,9 +30,13 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
-	offset = Latch::SaveLoad_A(mode, offset, data);
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
+	CheckSave(offset = Latch::SaveLoad_A(mode, offset, data));
 	SAVELOAD_BYTE(mode, offset, data, Jumper);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -96,7 +100,7 @@ unsigned char	MAPINT	Config (CFG_TYPE mode, unsigned char data)
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, FALSE);
 	ConfigWindow = NULL;
 	return TRUE;
 }
@@ -118,8 +122,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 59;
 } // namespace
 
-const MapperInfo MapperInfo_059 =
-{
+const MapperInfo MapperInfo_059
+(
 	&MapperNum,
 	_T("T3H53"),
 	COMPAT_FULL,
@@ -131,4 +135,4 @@ const MapperInfo MapperInfo_059 =
 	SaveLoad,
 	NULL,
 	Config
-};
+);

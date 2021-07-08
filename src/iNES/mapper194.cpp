@@ -23,7 +23,7 @@ void	Sync (void)
 
 BOOL	MAPINT	Load (void)
 {
-	MMC3::Load(Sync);
+	MMC3::Load(Sync, TRUE);
 	iNES_SetSRAM();
 	return TRUE;
 }
@@ -39,8 +39,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 194;
 } // namespace
 
-const MapperInfo MapperInfo_194 =
-{
+const MapperInfo MapperInfo_194
+(
 	&MapperNum,
 	_T("Mapper 194 (Pirate MMC3)"),
 	COMPAT_NEARLY,
@@ -52,4 +52,4 @@ const MapperInfo MapperInfo_194 =
 	MMC3::SaveLoad,
 	NULL,
 	NULL
-};
+);

@@ -21,12 +21,12 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, PRG);
 	SAVELOAD_BYTE(mode, offset, data, Valid);
-	offset = MMC3::SaveLoad(mode, offset, data);
-	if (mode == STATE_LOAD)
-		Sync();
-	return offset;
+	return MMC3::SaveLoad(mode, offset, data);
 }
 
 void	MAPINT	Write6 (int Bank, int Addr, int Val)
@@ -66,7 +66,7 @@ void	MAPINT	WriteEF (int Bank, int Addr, int Val)
 
 BOOL	MAPINT	Load (void)
 {
-	MMC3::Load(Sync);
+	MMC3::Load(Sync, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -96,8 +96,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 114;
 } // namespace
 
-const MapperInfo MapperInfo_114 =
-{
+const MapperInfo MapperInfo_114
+(
 	&MapperNum,
 	_T("Mapper 114"),
 	COMPAT_FULL,
@@ -109,4 +109,4 @@ const MapperInfo MapperInfo_114 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

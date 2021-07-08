@@ -12,13 +12,17 @@ FCPUWrite _Write4;
 void	Sync (void)
 {
 	EMU->SetPRG_ROM32(0x8, (Reg & 0x4) >> 2);
-	EMU->SetCHR_ROM8(0, (Reg & 0x78) >> 3);
+	EMU->SetCHR_ROM8(0x0, (Reg & 0x78) >> 3);
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, Reg);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -50,8 +54,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 147;
 } // namespace
 
-const MapperInfo MapperInfo_147 =
-{
+const MapperInfo MapperInfo_147
+(
 	&MapperNum,
 	_T("Sachen (TC-U01-1.5M)"),
 	COMPAT_FULL,
@@ -63,4 +67,4 @@ const MapperInfo MapperInfo_147 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

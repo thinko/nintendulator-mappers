@@ -14,7 +14,7 @@ uint8_t ConfigCmd;
 
 void	Sync (void)
 {
-	EMU->SetCHR_ROM8(0, Latch::Addr.s0 & 0x07);
+	EMU->SetCHR_ROM8(0x0, Latch::Addr.s0 & 0x07);
 	if (Latch::Addr.b0 & 0x80)
 	{
 		EMU->SetPRG_ROM16(0x8, (Latch::Addr.s0 & 0x70) >> 4);
@@ -91,7 +91,7 @@ unsigned char	MAPINT	Config (CFG_TYPE mode, unsigned char data)
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, TRUE);
 	ConfigWindow = NULL;
 	return TRUE;
 }
@@ -114,8 +114,8 @@ void	MAPINT	Unload (void)
 }
 } // namespace
 
-const MapperInfo MapperInfo_BMC_T3H53 =
-{
+const MapperInfo MapperInfo_BMC_T3H53
+(
 	"BMC-T3H53",
 	_T("Pirate multicart mapper with dipswitches"),
 	COMPAT_FULL,
@@ -127,4 +127,4 @@ const MapperInfo MapperInfo_BMC_T3H53 =
 	Latch::SaveLoad_A,
 	NULL,
 	Config
-};
+);

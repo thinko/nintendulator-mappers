@@ -19,8 +19,14 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
-	offset = MMC3::SaveLoad(mode, offset, data);
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
+	CheckSave(offset = MMC3::SaveLoad(mode, offset, data));
 	SAVELOAD_BYTE(mode, offset, data, WhichGame);
+
+	if (IsLoad(mode))
+		Sync();
 	return offset;
 }
 
@@ -38,7 +44,7 @@ void	MAPINT	WriteAB (int Bank, int Addr, int Val)
 
 BOOL	MAPINT	Load (void)
 {
-	MMC3::Load(Sync);
+	MMC3::Load(Sync, FALSE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -55,8 +61,8 @@ void	MAPINT	Unload (void)
 }
 } // namespace
 
-const MapperInfo MapperInfo_BMC_1991SuperHiK7in1 =
-{
+const MapperInfo MapperInfo_BMC_1991SuperHiK7in1
+(
 	"BMC-1991SuperHiK7in1",
 	_T("Pirate multicart mapper"),
 	COMPAT_FULL,
@@ -68,4 +74,4 @@ const MapperInfo MapperInfo_BMC_1991SuperHiK7in1 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

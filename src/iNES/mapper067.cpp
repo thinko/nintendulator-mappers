@@ -18,10 +18,10 @@ void	Sync (void)
 	EMU->SetPRG_ROM16(0x8, PRG);
 	EMU->SetPRG_ROM16(0xC, -1);
 
-	EMU->SetCHR_ROM2(0, CHR[0]);
-	EMU->SetCHR_ROM2(2, CHR[1]);
-	EMU->SetCHR_ROM2(4, CHR[2]);
-	EMU->SetCHR_ROM2(6, CHR[3]);
+	EMU->SetCHR_ROM2(0x0, CHR[0]);
+	EMU->SetCHR_ROM2(0x2, CHR[1]);
+	EMU->SetCHR_ROM2(0x4, CHR[2]);
+	EMU->SetCHR_ROM2(0x6, CHR[3]);
 
 	switch (Mirror & 3)
 	{
@@ -34,6 +34,9 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_WORD(mode, offset, data, IRQcounter.s0);
 	SAVELOAD_BYTE(mode, offset, data, IRQenabled);
 	SAVELOAD_BYTE(mode, offset, data, IRQpos);
@@ -41,7 +44,8 @@ int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 	for (int i = 0; i < 4; i++)
 		SAVELOAD_BYTE(mode, offset, data, CHR[i]);
 	SAVELOAD_BYTE(mode, offset, data, Mirror);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -154,8 +158,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 67;
 } // namespace
 
-const MapperInfo MapperInfo_067 =
-{
+const MapperInfo MapperInfo_067
+(
 	&MapperNum,
 	_T("Sunsoft Mapper #3"),
 	COMPAT_FULL,
@@ -167,4 +171,4 @@ const MapperInfo MapperInfo_067 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

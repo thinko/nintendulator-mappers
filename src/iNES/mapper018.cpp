@@ -18,7 +18,7 @@ void	Sync (void)
 {
 	EMU->SetPRG_RAM8(0x6, 0);
 	for (int i = 0; i < 3; i++)
-		EMU->SetPRG_ROM8(8 | (i << 1), PRG[i].b0);
+		EMU->SetPRG_ROM8(0x8 | (i << 1), PRG[i].b0);
 
 	EMU->SetPRG_ROM8(0xE, 0xFF);
 	for (int i = 0; i < 8; i++)
@@ -41,6 +41,9 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	for (int i = 0; i < 3; i++)
 		SAVELOAD_BYTE(mode, offset, data, PRG[i].b0);
 	for (int i = 0; i < 8; i++)
@@ -50,7 +53,8 @@ int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 	SAVELOAD_BYTE(mode, offset, data, IRQcontrol);
 	SAVELOAD_BYTE(mode, offset, data, Mirror);
 	SAVELOAD_BYTE(mode, offset, data, DisableSRAM);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -190,8 +194,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 18;
 } // namespace
 
-const MapperInfo MapperInfo_018 =
-{
+const MapperInfo MapperInfo_018
+(
 	&MapperNum,
 	_T("Jaleco SS8806"),
 	COMPAT_NEARLY,
@@ -203,4 +207,4 @@ const MapperInfo MapperInfo_018 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

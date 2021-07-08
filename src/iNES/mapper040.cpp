@@ -18,16 +18,20 @@ void	Sync (void)
 	EMU->SetPRG_ROM8(0xC, PRG);
 	EMU->SetPRG_ROM8(0xE, 7);
 	if (ROM->INES_CHRSize)
-		EMU->SetCHR_ROM8(0, 0);
-	else	EMU->SetCHR_RAM8(0, 0);
+		EMU->SetCHR_ROM8(0x0, 0);
+	else	EMU->SetCHR_RAM8(0x0, 0);
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, IRQenabled);
 	SAVELOAD_WORD(mode, offset, data, IRQcounter.s0);
 	SAVELOAD_BYTE(mode, offset, data, PRG);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -82,8 +86,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 40;
 } // namespace
 
-const MapperInfo MapperInfo_040 =
-{
+const MapperInfo MapperInfo_040
+(
 	&MapperNum,
 	_T("SMB2j Pirate"),
 	COMPAT_FULL,
@@ -95,4 +99,4 @@ const MapperInfo MapperInfo_040 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

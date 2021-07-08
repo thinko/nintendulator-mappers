@@ -12,14 +12,18 @@ uint8_t Game;
 void	Sync (void)
 {
 	EMU->SetPRG_ROM32(0x8, ((Game & 0x0F) << 1) | (Latch::Data & 0x01));
-	EMU->SetCHR_ROM8(0, ((Game & 0xF0) >> 1) | ((Latch::Data & 0x70) >> 4));
+	EMU->SetCHR_ROM8(0x0, ((Game & 0xF0) >> 1) | ((Latch::Data & 0x70) >> 4));
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
-	offset = Latch::SaveLoad_D(mode, offset, data);
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
+	CheckSave(offset = Latch::SaveLoad_D(mode, offset, data));
 	SAVELOAD_BYTE(mode, offset, data, Game);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -32,7 +36,7 @@ void	MAPINT	Write (int Bank, int Addr, int Val)
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, FALSE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -52,8 +56,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 46;
 } // namespace
 
-const MapperInfo MapperInfo_046 =
-{
+const MapperInfo MapperInfo_046
+(
 	&MapperNum,
 	_T("GameStation/RumbleStation"),
 	COMPAT_FULL,
@@ -65,4 +69,4 @@ const MapperInfo MapperInfo_046 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

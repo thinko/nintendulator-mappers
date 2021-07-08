@@ -14,17 +14,21 @@ uint8_t PRG, CHR;
 void	Sync (void)
 {
 	EMU->SetPRG_ROM32(0x8, PRG);
-	EMU->SetCHR_ROM8(0, CHR);
+	EMU->SetCHR_ROM8(0x0, CHR);
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, PRG);
 	SAVELOAD_BYTE(mode, offset, data, CHR);
 	SAVELOAD_BYTE(mode, offset, data, RegP);
 	SAVELOAD_BYTE(mode, offset, data, RegM);
 	SAVELOAD_BYTE(mode, offset, data, RegR);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -95,8 +99,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 36;
 } // namespace
 
-const MapperInfo MapperInfo_036 =
-{
+const MapperInfo MapperInfo_036
+(
 	&MapperNum,
 	_T("TXC 01-22000-400"),
 	COMPAT_FULL,
@@ -108,4 +112,4 @@ const MapperInfo MapperInfo_036 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

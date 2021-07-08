@@ -12,15 +12,19 @@ void	Sync (void)
 {
 	EMU->SetPRG_ROM16(0x8, PRG);
 	EMU->SetPRG_ROM16(0xC, -1);
-	EMU->SetCHR_ROM8(0, CHR);
+	EMU->SetCHR_ROM8(0x0, CHR);
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, PRG);
 	SAVELOAD_BYTE(mode, offset, data, CHR);
 	SAVELOAD_BYTE(mode, offset, data, Cmd);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -57,8 +61,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 72;
 } // namespace
 
-const MapperInfo MapperInfo_072 =
-{
+const MapperInfo MapperInfo_072
+(
 	&MapperNum,
 	_T("Pinball Quest"),
 	COMPAT_NEARLY,
@@ -70,4 +74,4 @@ const MapperInfo MapperInfo_072 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

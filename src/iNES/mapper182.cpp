@@ -45,7 +45,7 @@ void	MAPINT	WriteEF (int Bank, int Addr, int Val)
 
 BOOL	MAPINT	Load (void)
 {
-	MMC3::Load(Sync);
+	MMC3::Load(Sync, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -69,8 +69,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 182;
 } // namespace
 
-const MapperInfo MapperInfo_182 =
-{
+const MapperInfo MapperInfo_182
+(
 	&MapperNum,
 	_T("Super Donkey Kong"),
 	COMPAT_FULL,
@@ -82,4 +82,4 @@ const MapperInfo MapperInfo_182 =
 	MMC3::SaveLoad,
 	NULL,
 	NULL
-};
+);

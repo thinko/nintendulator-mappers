@@ -25,12 +25,16 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	for (int i = 0; i < 2; i++)
 		SAVELOAD_BYTE(mode, offset, data, PRG[i]);
 	for (int i = 0; i < 8; i++)
 		SAVELOAD_BYTE(mode, offset, data, CHR[i].b0);
 	SAVELOAD_BYTE(mode, offset, data, Mirror);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -123,10 +127,10 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 22;
 } // namespace
 
-const MapperInfo MapperInfo_022 =
-{
+const MapperInfo MapperInfo_022
+(
 	&MapperNum,
-	_T("Konami VRC2"),
+	_T("Konami VRC2a"),
 	COMPAT_NEARLY,
 	Load,
 	Reset,
@@ -136,4 +140,4 @@ const MapperInfo MapperInfo_022 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

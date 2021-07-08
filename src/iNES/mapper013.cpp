@@ -9,14 +9,14 @@ namespace
 {
 void	Sync (void)
 {
-	EMU->SetCHR_RAM4(0, 0);
-	EMU->SetCHR_RAM4(4, Latch::Data & 0x03);
+	EMU->SetCHR_RAM4(0x0, 0);
+	EMU->SetCHR_RAM4(0x4, Latch::Data & 0x03);
 	EMU->SetPRG_ROM32(0x8, 0);
 }
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -32,8 +32,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 13;
 } // namespace
 
-const MapperInfo MapperInfo_013 =
-{
+const MapperInfo MapperInfo_013
+(
 	&MapperNum,
 	_T("CPROM"),
 	COMPAT_FULL,
@@ -45,4 +45,4 @@ const MapperInfo MapperInfo_013 =
 	Latch::SaveLoad_D,
 	NULL,
 	NULL
-};
+);

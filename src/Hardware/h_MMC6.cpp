@@ -16,10 +16,12 @@ uint8_t Mirror;
 FCPURead _CPURead7;
 FCPUWrite _CPUWrite7;
 FSync Sync;
+BOOL SyncOnLoad;
 
-void	Load (FSync _Sync)
+void	Load (FSync _Sync, BOOL _SyncOnLoad)
 {
 	Sync = _Sync;
+	SyncOnLoad = _SyncOnLoad;
 }
 
 void	Reset (RESET_TYPE ResetType)
@@ -79,7 +81,7 @@ int	GetCHRBank (int Bank)
 void	SyncPRG (int AND, int OR)
 {
 	for (int i = 0; i < 4; i++)
-		EMU->SetPRG_ROM8(8 | (i << 1), (GetPRGBank(i) & AND) | OR);
+		EMU->SetPRG_ROM8(0x8 | (i << 1), (GetPRGBank(i) & AND) | OR);
 }
 
 void	SyncCHR_ROM (int AND, int OR)
@@ -96,27 +98,21 @@ void	SyncCHR_RAM (int AND, int OR)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, IRQcounter);
 	SAVELOAD_BYTE(mode, offset, data, IRQlatch);
 	SAVELOAD_BYTE(mode, offset, data, IRQenabled);
 	SAVELOAD_BYTE(mode, offset, data, Cmd);
 	for (int i = 0; i < 2; i++)
 		SAVELOAD_BYTE(mode, offset, data, PRG[i]);
-	switch (mode)
+	SAVELOAD_BYTE(mode, offset, data, CHR[0]);
+	SAVELOAD_BYTE(mode, offset, data, CHR[2]);
+	if (IsLoad(mode))
 	{
-	case STATE_SAVE:
-		data[offset++] = CHR[0];
-		data[offset++] = CHR[2];
-		break;
-	case STATE_LOAD:
-		CHR[0] = data[offset++];
 		CHR[1] = CHR[0] | 1;
-		CHR[2] = data[offset++];
 		CHR[3] = CHR[2] | 1;
-		break;
-	case STATE_SIZE:
-		offset += 2;
-		break;
 	}
 	for (int i = 4; i < 8; i++)
 		SAVELOAD_BYTE(mode, offset, data, CHR[i]);
@@ -124,7 +120,8 @@ int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 	SAVELOAD_BYTE(mode, offset, data, Mirror);
 	SAVELOAD_BYTE(mode, offset, data, IRQreload);
 	SAVELOAD_BYTE(mode, offset, data, IRQaddr);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode) && SyncOnLoad)
 		Sync();
 	return offset;
 }
@@ -133,7 +130,7 @@ int	MAPINT	CPURead7 (int Bank, int Addr)
 {
 	if (WRAMEnab & 0xA0)
 	{
-		if ((WRAMEnab >> ((Addr & 0x200) >> 8)) & 0x20)
+		if (WRAMEnab & ((Addr & 0x200) ? 0x80 : 0x20))
 			return _CPURead7(0x7, Addr & 0x3FF);
 		else	return 0;
 	}
@@ -142,7 +139,7 @@ int	MAPINT	CPURead7 (int Bank, int Addr)
 
 void	MAPINT	CPUWrite7 (int Bank, int Addr, int Val)
 {
-	if (((WRAMEnab >> ((Addr & 0x200) >> 8)) & 0x30) == 0x30)
+	if ((Addr & 0x200) ? ((WRAMEnab & 0xC0) == 0xC0) : ((WRAMEnab & 0x30) == 0x30))
 		_CPUWrite7(0x7, Addr & 0x3FF, Val);
 }
 
@@ -165,8 +162,8 @@ void	MAPINT	CPUWrite89 (int Bank, int Addr, int Val)
 	else
 	{
 		Cmd = Val;
-		if (Val & 0x20)
-			WRAMEnab |= 1;
+		if (!(Cmd & 0x20))
+			WRAMEnab = 0;
 	}
 	Sync();
 }
@@ -175,8 +172,8 @@ void	MAPINT	CPUWriteAB (int Bank, int Addr, int Val)
 {
 	if (Addr & 1)
 	{
-		if (WRAMEnab & 1)
-			WRAMEnab = Val | 1;
+		if (Cmd & 0x20)
+			WRAMEnab = Val;
 	}
 	else	Mirror = Val;
 	Sync();

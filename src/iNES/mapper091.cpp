@@ -16,21 +16,25 @@ void	Sync (void)
 	EMU->SetPRG_ROM8(0x8, PRG[0]);
 	EMU->SetPRG_ROM8(0xA, PRG[1]);
 	EMU->SetPRG_ROM16(0xC, -1);
-	EMU->SetCHR_ROM2(0, CHR[0]);
-	EMU->SetCHR_ROM2(2, CHR[1]);
-	EMU->SetCHR_ROM2(4, CHR[2]);
-	EMU->SetCHR_ROM2(6, CHR[3]);
+	EMU->SetCHR_ROM2(0x0, CHR[0]);
+	EMU->SetCHR_ROM2(0x2, CHR[1]);
+	EMU->SetCHR_ROM2(0x4, CHR[2]);
+	EMU->SetCHR_ROM2(0x6, CHR[3]);
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	for (int i = 0; i < 2; i++)
 		SAVELOAD_BYTE(mode, offset, data, PRG[i]);
 	for (int i = 0; i < 4; i++)
 		SAVELOAD_BYTE(mode, offset, data, CHR[i]);
 	SAVELOAD_BYTE(mode, offset, data, IRQenabled);
 	SAVELOAD_BYTE(mode, offset, data, IRQcounter);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -85,8 +89,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 91;
 } // namespace
 
-const MapperInfo MapperInfo_091 =
-{
+const MapperInfo MapperInfo_091
+(
 	&MapperNum,
 	_T("PC-HK-SF3"),
 	COMPAT_FULL,
@@ -98,4 +102,4 @@ const MapperInfo MapperInfo_091 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

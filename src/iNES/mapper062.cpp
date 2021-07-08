@@ -31,7 +31,7 @@ void	Sync (void)
 	addr = Latch::Addr.s0;
 	data = Latch::Data;
 
-	EMU->SetCHR_ROM8(0, (CHRhi << 2) | CHRlo);
+	EMU->SetCHR_ROM8(0x0, (CHRhi << 2) | CHRlo);
 
 	if (PRGsize)
 	{
@@ -47,7 +47,7 @@ void	Sync (void)
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -62,8 +62,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 62;
 } // namespace
 
-const MapperInfo MapperInfo_062 =
-{
+const MapperInfo MapperInfo_062
+(
 	&MapperNum,
 	_T("700-in-1"),
 	COMPAT_FULL,
@@ -75,4 +75,4 @@ const MapperInfo MapperInfo_062 =
 	Latch::SaveLoad_AD,
 	NULL,
 	NULL
-};
+);

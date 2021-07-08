@@ -12,15 +12,19 @@ uint8_t Pos;
 void	Sync (void)
 {
 	EMU->SetPRG_ROM32(0x8, Latch::Data & 0x3);
-	EMU->SetCHR_RAM4(0, (Latch::Data & 0x4) | (Pos & 3));
-	EMU->SetCHR_RAM4(4, (Latch::Data & 0x4) | 3);
+	EMU->SetCHR_RAM4(0x0, (Latch::Data & 0x4) | (Pos & 3));
+	EMU->SetCHR_RAM4(0x4, (Latch::Data & 0x4) | 3);
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
-	offset = Latch::SaveLoad_D(mode, offset, data);
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
+	CheckSave(offset = Latch::SaveLoad_D(mode, offset, data));
 	SAVELOAD_BYTE(mode, offset, data, Pos);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -38,7 +42,7 @@ void	MAPINT	PPUCycle (int Addr, int Scanline, int Cycle, int IsRendering)
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, FALSE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -59,8 +63,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 96;
 } // namespace
 
-const MapperInfo MapperInfo_096 =
-{
+const MapperInfo MapperInfo_096
+(
 	&MapperNum,
 	_T("Oeka Kids"),
 	COMPAT_FULL,
@@ -72,4 +76,4 @@ const MapperInfo MapperInfo_096 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

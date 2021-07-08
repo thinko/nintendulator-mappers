@@ -18,7 +18,7 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 	iNES_SetMirroring();
 
 	EMU->SetPRG_ROM32(0x8, 0);
-	EMU->SetCHR_ROM8(0, 0);
+	EMU->SetCHR_ROM8(0x0, 0);
 }
 void	MAPINT	Unload (void)
 {
@@ -28,8 +28,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 0;
 } // namespace
 
-const MapperInfo MapperInfo_000 =
-{
+const MapperInfo MapperInfo_000
+(
 	&MapperNum,
 	_T("NROM"),
 	COMPAT_FULL,
@@ -41,4 +41,4 @@ const MapperInfo MapperInfo_000 =
 	VS::SaveLoad,
 	NULL,
 	VS::Config
-};
+);

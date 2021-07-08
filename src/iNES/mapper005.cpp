@@ -102,17 +102,17 @@ int	CheckSRAM (void)
 		}
 	}
 
-	orig = EMU->GetPRG_ROM4(8);
+	orig = EMU->GetPRG_ROM4(0x8);
 
-	EMU->SetPRG_ROM4(8, 0);
-	CRC = CalcCRC(EMU->GetPRG_Ptr4(8), ROM->INES_PRGSize << 14);
+	EMU->SetPRG_ROM4(0x8, 0);
+	CRC = CalcCRC(EMU->GetPRG_Ptr4(0x8), ROM->INES_PRGSize << 14);
 	for (int i = 0; i < 23; i++)
 		if (MMC5Carts[i].CRC == CRC)
 			size = MMC5Carts[i].SRAMconf;
 
 	if (orig == -1)
-		EMU->SetPRG_OB4(8);
-	else	EMU->SetPRG_ROM4(8, orig);
+		EMU->SetPRG_OB4(0x8);
+	else	EMU->SetPRG_ROM4(0x8, orig);
 	return size;
 }
 
@@ -249,8 +249,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 5;
 } // namespace
 
-const MapperInfo MapperInfo_005 =
-{
+const MapperInfo MapperInfo_005
+(
 	&MapperNum,
 	_T("MMC5"),
 	COMPAT_FULL,
@@ -262,4 +262,4 @@ const MapperInfo MapperInfo_005 =
 	MMC5::SaveLoad,
 	MMC5::MapperSnd,
 	Config
-};
+);

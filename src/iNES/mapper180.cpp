@@ -18,7 +18,7 @@ void	Sync (void)
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -33,8 +33,9 @@ void	MAPINT	Unload (void)
 
 uint16_t MapperNum = 180;
 } // namespace
-const MapperInfo MapperInfo_180 =
-{
+
+const MapperInfo MapperInfo_180
+(
 	&MapperNum,
 	_T("Mapper 180"),
 	COMPAT_FULL,
@@ -46,4 +47,4 @@ const MapperInfo MapperInfo_180 =
 	Latch::SaveLoad_D,
 	NULL,
 	NULL
-};
+);

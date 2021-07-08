@@ -14,7 +14,7 @@ void	Sync (void)
 {
 	EMU->SetPRG_RAM8(0x6, 0);
 	EMU->SetPRG_ROM32(0x8, 0);
-	EMU->SetCHR_ROM8(0, CHR);
+	EMU->SetCHR_ROM8(0x0, CHR);
 	// Vs. Gumshoe has an extra 8KB of PRG ROM which it swaps using the same register
 	if (ROM->INES_PRGSize > 2)
 		EMU->SetPRG_ROM8(0x8, CHR << 2);
@@ -22,9 +22,13 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, CHR);
-	offset = VS::SaveLoad(mode, offset, data);
-	if (mode == STATE_LOAD)
+	CheckSave(offset = VS::SaveLoad(mode, offset, data));
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -63,8 +67,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 99;
 } // namespace
 
-const MapperInfo MapperInfo_099 =
-{
+const MapperInfo MapperInfo_099
+(
 	&MapperNum,
 	_T("VS Unisystem"),
 	COMPAT_FULL,
@@ -76,4 +80,4 @@ const MapperInfo MapperInfo_099 =
 	SaveLoad,
 	NULL,
 	VS::Config
-};
+);

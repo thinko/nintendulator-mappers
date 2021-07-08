@@ -10,12 +10,12 @@ namespace
 void	Sync_BNROM (void)
 {
 	EMU->SetPRG_ROM32(0x8, Latch::Data & 0x3);
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 }
 
 BOOL	MAPINT	Load_BNROM (void)
 {
-	Latch::Load(Sync_BNROM, TRUE);
+	Latch::Load(Sync_BNROM, TRUE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -29,8 +29,8 @@ void	MAPINT	Unload (void)
 }
 } // namespace
 
-const MapperInfo MapperInfo_NES_BNROM =
-{
+const MapperInfo MapperInfo_NES_BNROM
+(
 	"NES-BNROM",
 	_T("Standard 32KB PRG switch"),
 	COMPAT_FULL,
@@ -42,4 +42,4 @@ const MapperInfo MapperInfo_NES_BNROM =
 	Latch::SaveLoad_D,
 	NULL,
 	NULL
-};
+);

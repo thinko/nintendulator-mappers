@@ -47,10 +47,10 @@ void	Sync (void)
 	}
 	if (ROM->INES_CHRSize > 32)
 	{
-		EMU->SetCHR_ROM2(0, CHR[0]);
-		EMU->SetCHR_ROM2(2, CHR[1]);
-		EMU->SetCHR_ROM2(4, CHR[6]);
-		EMU->SetCHR_ROM2(6, CHR[7]);
+		EMU->SetCHR_ROM2(0x0, CHR[0]);
+		EMU->SetCHR_ROM2(0x2, CHR[1]);
+		EMU->SetCHR_ROM2(0x4, CHR[6]);
+		EMU->SetCHR_ROM2(0x6, CHR[7]);
 	}
 	else
 	{
@@ -68,13 +68,17 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, Mode);
 	for (int i = 0; i < 5; i++)
 		SAVELOAD_BYTE(mode, offset, data, PRG[i]);
 	for (int i = 0; i < 8; i++)
 		SAVELOAD_BYTE(mode, offset, data, CHR[i]);
 	SAVELOAD_WORD(mode, offset, data, IRQcounter.s0);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -137,8 +141,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 83;
 } // namespace
 
-const MapperInfo MapperInfo_083 =
-{
+const MapperInfo MapperInfo_083
+(
 	&MapperNum,
 	_T("Cony"),
 	COMPAT_NEARLY,
@@ -150,4 +154,4 @@ const MapperInfo MapperInfo_083 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

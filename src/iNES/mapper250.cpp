@@ -34,7 +34,7 @@ void	MAPINT	WriteEF (int Bank, int Addr, int Val)
 
 BOOL	MAPINT	Load (void)
 {
-	MMC3::Load(Sync);
+	MMC3::Load(Sync, TRUE);
 	iNES_SetSRAM();
 	return TRUE;
 }
@@ -59,8 +59,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 250;
 } // namespace
 
-const MapperInfo MapperInfo_250 =
-{
+const MapperInfo MapperInfo_250
+(
 	&MapperNum,
 	_T("Time Diver Avenger (MMC3 Variant)"),
 	COMPAT_FULL,
@@ -72,4 +72,4 @@ const MapperInfo MapperInfo_250 =
 	MMC3::SaveLoad,
 	NULL,
 	NULL
-};
+);

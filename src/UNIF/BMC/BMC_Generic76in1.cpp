@@ -33,6 +33,7 @@ void	Sync (void)
 	if (Mir_VH)
 		EMU->Mirror_V();
 	else	EMU->Mirror_H();
+	EMU->SetCHR_RAM8(0x0, 0);
 	if (PRGsize)
 	{
 		EMU->SetPRG_ROM16(0x8, ((PRGhi) << 5) | (PRGbank));
@@ -43,9 +44,13 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	for (int i = 0; i < 2; i++)
 		SAVELOAD_BYTE(mode, offset, data, Regs[i]);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -66,8 +71,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 }
 } // namespace
 
-const MapperInfo MapperInfo_BMC_Generic76in1 =
-{
+const MapperInfo MapperInfo_BMC_Generic76in1
+(
 	"BMC-Generic76in1",
 	_T("Pirate multicart mapper"),
 	COMPAT_FULL,
@@ -79,4 +84,4 @@ const MapperInfo MapperInfo_BMC_Generic76in1 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

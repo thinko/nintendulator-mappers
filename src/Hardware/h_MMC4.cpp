@@ -12,11 +12,13 @@ uint8_t Latch0[2];
 uint8_t Latch1[2];
 uint8_t Mirror;
 FSync Sync;
+BOOL SyncOnLoad;
 FPPURead _PPURead3, _PPURead7;
 
-void	Load (FSync _Sync)
+void	Load (FSync _Sync, BOOL _SyncOnLoad)
 {
 	Sync = _Sync;
+	SyncOnLoad = _SyncOnLoad;
 }
 
 void	Reset (RESET_TYPE ResetType)
@@ -53,6 +55,9 @@ void	Unload (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, Latch0[0]);
 	SAVELOAD_BYTE(mode, offset, data, Latch0[1]);
 	SAVELOAD_BYTE(mode, offset, data, Latch1[0]);
@@ -61,7 +66,8 @@ int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 	SAVELOAD_BYTE(mode, offset, data, LatchState[1]);
 	SAVELOAD_BYTE(mode, offset, data, PRG);
 	SAVELOAD_BYTE(mode, offset, data, Mirror);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode) && SyncOnLoad)
 		Sync();
 	return offset;
 }
@@ -74,8 +80,8 @@ void	SyncPRG (int AND, int OR)
 
 void	SyncCHR (void)
 {
-	EMU->SetCHR_ROM4(0, Latch0[LatchState[0]]);
-	EMU->SetCHR_ROM4(4, Latch1[LatchState[1]]);
+	EMU->SetCHR_ROM4(0x0, Latch0[LatchState[0]]);
+	EMU->SetCHR_ROM4(0x4, Latch1[LatchState[1]]);
 }
 
 void	SyncMirror (void)
@@ -92,12 +98,12 @@ int	MAPINT	PPURead3 (int Bank, int Addr)
 	if (addy == 0x3D8)
 	{
 		LatchState[0] = 0;
-		EMU->SetCHR_ROM4(0, Latch0[0]);
+		EMU->SetCHR_ROM4(0x0, Latch0[0]);
 	}
 	else if (addy == 0x3E8)
 	{
 		LatchState[0] = 1;
-		EMU->SetCHR_ROM4(0, Latch0[1]);
+		EMU->SetCHR_ROM4(0x0, Latch0[1]);
 	}
 	return result;
 }
@@ -109,12 +115,12 @@ int	MAPINT	PPURead7 (int Bank, int Addr)
 	if (addy == 0x3D8)
 	{
 		LatchState[1] = 0;
-		EMU->SetCHR_ROM4(4, Latch1[0]);
+		EMU->SetCHR_ROM4(0x4, Latch1[0]);
 	}
 	else if (addy == 0x3E8)
 	{
 		LatchState[1] = 1;
-		EMU->SetCHR_ROM4(4, Latch1[1]);
+		EMU->SetCHR_ROM4(0x4, Latch1[1]);
 	}
 	return result;
 }

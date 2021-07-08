@@ -15,38 +15,42 @@ void	Sync_72007 (void)
 {
 	EMU->SetPRG_ROM16(0x8, 0);
 	EMU->SetPRG_ROM16(0xC, 1);
-	EMU->SetCHR_ROM8(0, (Latch >> 7) & 0x1);
+	EMU->SetCHR_ROM8(0x0, (Latch >> 7) & 0x1);
 }
 void	Sync_72008 (void)
 {
 	EMU->SetPRG_ROM32(0x8, (Latch >> 2) & 0x1);
-	EMU->SetCHR_ROM8(0, Latch & 0x3);
+	EMU->SetCHR_ROM8(0x0, Latch & 0x3);
 }
 void	Sync_0161M (void)
 {
 	EMU->SetPRG_ROM32(0x8, (Latch >> 3) & 0x1);
-	EMU->SetCHR_ROM8(0, Latch & 0x7);
+	EMU->SetCHR_ROM8(0x0, Latch & 0x7);
 }
 void	Sync_U0115M (void)
 {
 	EMU->SetPRG_ROM32(0x8, (Latch >> 2) & 0x1);
-	EMU->SetCHR_ROM8(0, (Latch >> 3) & 0xF);
+	EMU->SetCHR_ROM8(0x0, (Latch >> 3) & 0xF);
 }
 void	Sync_0036 (void)
 {
 	EMU->SetPRG_ROM32(0x8, 0);
-	EMU->SetCHR_ROM8(0, (Latch::Data & 0x80) >> 7);
+	EMU->SetCHR_ROM8(0x0, (Latch::Data & 0x80) >> 7);
 }
 void	Sync_0037 (void)
 {
 	EMU->SetPRG_ROM32(0x8, (Latch::Data & 0x8) >> 3);
-	EMU->SetCHR_ROM8(0, Latch::Data & 0x7);
+	EMU->SetCHR_ROM8(0x0, Latch::Data & 0x7);
 }
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, Latch);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -112,12 +116,12 @@ void	MAPINT	Reset_U0115M (RESET_TYPE ResetType)
 
 BOOL	MAPINT	Load_0036 (void)
 {
-	Latch::Load(Sync_0036, FALSE);
+	Latch::Load(Sync_0036, FALSE, TRUE);
 	return TRUE;
 }
 BOOL	MAPINT	Load_0037 (void)
 {
-	Latch::Load(Sync_0037, FALSE);
+	Latch::Load(Sync_0037, FALSE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset_003x (RESET_TYPE ResetType)
@@ -131,8 +135,8 @@ void	MAPINT	Unload_003x (void)
 }
 } // namespace
 
-const MapperInfo MapperInfo_UNL_SA_0161M =
-{
+const MapperInfo MapperInfo_UNL_SA_0161M
+(
 	"UNL-SA-016-1M",
 	_T("Sachen mapper"),
 	COMPAT_FULL,
@@ -144,9 +148,9 @@ const MapperInfo MapperInfo_UNL_SA_0161M =
 	SaveLoad,
 	NULL,
 	NULL
-};
-const MapperInfo MapperInfo_UNL_SA_72007 =
-{
+);
+const MapperInfo MapperInfo_UNL_SA_72007
+(
 	"UNL-SA-72007",
 	_T("Sachen mapper"),
 	COMPAT_FULL,
@@ -158,9 +162,9 @@ const MapperInfo MapperInfo_UNL_SA_72007 =
 	SaveLoad,
 	NULL,
 	NULL
-};
-const MapperInfo MapperInfo_UNL_SA_72008 =
-{
+);
+const MapperInfo MapperInfo_UNL_SA_72008
+(
 	"UNL-SA-72008",
 	_T("Sachen mapper"),
 	COMPAT_FULL,
@@ -172,9 +176,9 @@ const MapperInfo MapperInfo_UNL_SA_72008 =
 	SaveLoad,
 	NULL,
 	NULL
-};
-const MapperInfo MapperInfo_UNL_TC_U0115M =
-{
+);
+const MapperInfo MapperInfo_UNL_TC_U0115M
+(
 	"UNL-TC-U01-1.5M",
 	_T("Sachen mapper"),
 	COMPAT_FULL,
@@ -186,9 +190,9 @@ const MapperInfo MapperInfo_UNL_TC_U0115M =
 	SaveLoad,
 	NULL,
 	NULL
-};
-const MapperInfo MapperInfo_UNL_SA_0036 =
-{
+);
+const MapperInfo MapperInfo_UNL_SA_0036
+(
 	"UNL-SA-0036",
 	_T("Sachen mapper"),
 	COMPAT_FULL,
@@ -200,9 +204,9 @@ const MapperInfo MapperInfo_UNL_SA_0036 =
 	Latch::SaveLoad_D,
 	NULL,
 	NULL
-};
-const MapperInfo MapperInfo_UNL_SA_0037 =
-{
+);
+const MapperInfo MapperInfo_UNL_SA_0037
+(
 	"UNL-SA-0037",
 	_T("Sachen mapper"),
 	COMPAT_FULL,
@@ -214,4 +218,4 @@ const MapperInfo MapperInfo_UNL_SA_0037 =
 	Latch::SaveLoad_D,
 	NULL,
 	NULL
-};
+);

@@ -30,9 +30,15 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
-	offset = MMC3::SaveLoad(mode, offset, data);
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
+	CheckSave(offset = MMC3::SaveLoad(mode, offset, data));
 	SAVELOAD_BYTE(mode, offset, data, Reg0);
 	SAVELOAD_BYTE(mode, offset, data, Reg1);
+
+	if (IsLoad(mode))
+		Sync();
 	return offset;
 }
 
@@ -66,7 +72,7 @@ void	MAPINT	Write89 (int Bank, int Addr, int Val)
 
 BOOL	MAPINT	Load (void)
 {
-	MMC3::Load(Sync);
+	MMC3::Load(Sync, FALSE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -88,8 +94,8 @@ void	MAPINT	Unload (void)
 }
 } // namespace
 
-const MapperInfo MapperInfo_UNL_H2288 =
-{
+const MapperInfo MapperInfo_UNL_H2288
+(
 	"UNL-H2288",
 	_T("Earthworm Jim 2 Pirate (with insane copy protection)"),
 	COMPAT_NEARLY,
@@ -101,4 +107,4 @@ const MapperInfo MapperInfo_UNL_H2288 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

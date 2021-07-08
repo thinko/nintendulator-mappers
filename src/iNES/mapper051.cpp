@@ -6,20 +6,20 @@
 
 namespace
 {
-uint8_t Bank, Mode;
+uint8_t PRG, Mode;
 
 void	Sync (void)
 {
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 	if (Mode & 1)
-		EMU->SetPRG_ROM8(0x6, Bank | 0x23);
-	else	EMU->SetPRG_ROM8(0x6, Bank | 0x2F);
+		EMU->SetPRG_ROM8(0x6, PRG | 0x23);
+	else	EMU->SetPRG_ROM8(0x6, PRG | 0x2F);
 	if (Mode == 2)
-		EMU->SetPRG_ROM16(0x8, (Bank >> 1) | 1);
-	else	EMU->SetPRG_ROM16(0x8, Bank >> 1);
+		EMU->SetPRG_ROM16(0x8, (PRG >> 1) | 1);
+	else	EMU->SetPRG_ROM16(0x8, PRG >> 1);
 	if (Mode & 1)
-		EMU->SetPRG_ROM16(0xC, (Bank >> 1) | 1);
-	else	EMU->SetPRG_ROM16(0xC, (Bank >> 1) | 7);
+		EMU->SetPRG_ROM16(0xC, (PRG >> 1) | 1);
+	else	EMU->SetPRG_ROM16(0xC, (PRG >> 1) | 7);
 	if (Mode == 3)
 		EMU->Mirror_H();
 	else	EMU->Mirror_V();
@@ -27,9 +27,13 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
-	SAVELOAD_BYTE(mode, offset, data, Bank);
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
+	SAVELOAD_BYTE(mode, offset, data, PRG);
 	SAVELOAD_BYTE(mode, offset, data, Mode);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -41,8 +45,8 @@ void	MAPINT	Write67 (int Bank, int Addr, int Val)
 }
 void	MAPINT	Write89ABCDEF (int Bank, int Addr, int Val)
 {
-	Bank = (Val & 0xF) << 2;
-	if (Bank & 0x4)
+	PRG = (Val & 0xF) << 2;
+	if (PRG & 0x4)
 		Mode = (Mode & 0x1) | ((Val & 0x10) >> 3);
 	Sync();
 }
@@ -56,7 +60,7 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 
 	if (ResetType == RESET_HARD)
 	{
-		Bank = 0;
+		PRG = 0;
 		Mode = 1;
 	}
 	Sync();
@@ -65,8 +69,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 uint16_t MapperNum = 51;
 } // namespace
 
-const MapperInfo MapperInfo_051 =
-{
+const MapperInfo MapperInfo_051
+(
 	&MapperNum,
 	_T("11 in 1 Ball Games"),
 	COMPAT_FULL,
@@ -78,4 +82,4 @@ const MapperInfo MapperInfo_051 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

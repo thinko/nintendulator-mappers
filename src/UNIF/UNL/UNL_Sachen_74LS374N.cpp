@@ -13,7 +13,7 @@ void	Sync (void)
 {
 	EMU->SetPRG_ROM16(0x8, (PRG << 1) | 0);
 	EMU->SetPRG_ROM16(0xC, (PRG << 1) | 1);
-	EMU->SetCHR_ROM8(0, CHR);
+	EMU->SetCHR_ROM8(0x0, CHR);
 	if (Mirror)
 		EMU->Mirror_V();
 	else	EMU->Mirror_H();
@@ -21,11 +21,15 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, Cmd);
 	SAVELOAD_BYTE(mode, offset, data, PRG);
 	SAVELOAD_BYTE(mode, offset, data, CHR);
 	SAVELOAD_BYTE(mode, offset, data, Mirror);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -71,8 +75,8 @@ void	MAPINT	Reset (RESET_TYPE ResetType)
 }
 } // namespace
 
-const MapperInfo MapperInfo_UNL_Sachen_74LS374N =
-{
+const MapperInfo MapperInfo_UNL_Sachen_74LS374N
+(
 	"UNL-Sachen-74LS374N",
 	_T("Sachen mapper"),
 	COMPAT_PARTIAL,
@@ -84,4 +88,4 @@ const MapperInfo MapperInfo_UNL_Sachen_74LS374N =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

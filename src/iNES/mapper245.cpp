@@ -20,15 +20,15 @@ void	Sync (void)
 	MMC3::SyncPRG(0x3F, (MMC3::CHR[0] & 0x2) << 5);
 	if (!ROM->INES_CHRSize)
 	{
-		EMU->SetCHR_RAM4(0, ((MMC3::Cmd & 0x80) >> 7) ^ 0);
-		EMU->SetCHR_RAM4(4, ((MMC3::Cmd & 0x80) >> 7) ^ 1);
+		EMU->SetCHR_RAM4(0x0, ((MMC3::Cmd & 0x80) >> 7) ^ 0);
+		EMU->SetCHR_RAM4(0x4, ((MMC3::Cmd & 0x80) >> 7) ^ 1);
 	}
 	else	MMC3::SyncCHR_ROM(0xFF, 0);
 }
 
 BOOL	MAPINT	Load (void)
 {
-	MMC3::Load(Sync);
+	MMC3::Load(Sync, TRUE);
 	iNES_SetSRAM();
 	return TRUE;
 }
@@ -44,8 +44,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 245;
 } // namespace
 
-const MapperInfo MapperInfo_245 =
-{
+const MapperInfo MapperInfo_245
+(
 	&MapperNum,
 	_T("Waixing MMC3 clone"),
 	COMPAT_NEARLY,
@@ -57,4 +57,4 @@ const MapperInfo MapperInfo_245 =
 	MMC3::SaveLoad,
 	NULL,
 	NULL
-};
+);

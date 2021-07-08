@@ -13,11 +13,11 @@ FSync Sync;
 void	Sync_8259A (void)
 {
 	EMU->SetPRG_ROM32(0x8, PRG);
-	EMU->SetCHR_RAM8(0, 0);	// in case there is no CHR ROM
-	EMU->SetCHR_ROM2(0, 0 | (CHR0l << 1) | (CHRch << 4));
-	EMU->SetCHR_ROM2(2, 1 | (CHR0h << 1) | (CHRch << 4));
-	EMU->SetCHR_ROM2(4, 0 | (CHR1l << 1) | (CHRch << 4));
-	EMU->SetCHR_ROM2(6, 1 | (CHR1h << 1) | (CHRch << 4));
+	EMU->SetCHR_RAM8(0x0, 0);	// in case there is no CHR ROM
+	EMU->SetCHR_ROM2(0x0, 0 | (CHR0l << 1) | (CHRch << 4));
+	EMU->SetCHR_ROM2(0x2, 1 | (CHR0h << 1) | (CHRch << 4));
+	EMU->SetCHR_ROM2(0x4, 0 | (CHR1l << 1) | (CHRch << 4));
+	EMU->SetCHR_ROM2(0x6, 1 | (CHR1h << 1) | (CHRch << 4));
 	switch (Mirror >> 1)
 	{
 	case 0: EMU->Mirror_Custom(0, 0, 0, 1);	break;
@@ -29,11 +29,11 @@ void	Sync_8259A (void)
 void	Sync_8259B (void)
 {
 	EMU->SetPRG_ROM32(0x8, PRG);
-	EMU->SetCHR_RAM8(0, 0);	// in case there is no CHR ROM
-	EMU->SetCHR_ROM2(0, CHR0l | (CHRch << 3));
-	EMU->SetCHR_ROM2(2, CHR0h | (CHRch << 3));
-	EMU->SetCHR_ROM2(4, CHR1l | (CHRch << 3));
-	EMU->SetCHR_ROM2(6, CHR1h | (CHRch << 3));
+	EMU->SetCHR_RAM8(0x0, 0);	// in case there is no CHR ROM
+	EMU->SetCHR_ROM2(0x0, CHR0l | (CHRch << 3));
+	EMU->SetCHR_ROM2(0x2, CHR0h | (CHRch << 3));
+	EMU->SetCHR_ROM2(0x4, CHR1l | (CHRch << 3));
+	EMU->SetCHR_ROM2(0x6, CHR1h | (CHRch << 3));
 	switch (Mirror >> 1)
 	{
 	case 0: EMU->Mirror_Custom(0, 0, 0, 1);	break;
@@ -45,6 +45,9 @@ void	Sync_8259B (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, Cmd);
 	SAVELOAD_BYTE(mode, offset, data, CHR0l);
 	SAVELOAD_BYTE(mode, offset, data, CHR0h);
@@ -54,7 +57,8 @@ int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 	SAVELOAD_BYTE(mode, offset, data, PRG);
 	SAVELOAD_BYTE(mode, offset, data, CHRmode);
 	SAVELOAD_BYTE(mode, offset, data, Mirror);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
@@ -106,8 +110,8 @@ void	MAPINT	Reset_8259B (RESET_TYPE ResetType)
 }
 } // namespace
 
-const MapperInfo MapperInfo_UNL_Sachen_8259A =
-{
+const MapperInfo MapperInfo_UNL_Sachen_8259A
+(
 	"UNL-Sachen-8259A",
 	_T("Sachen mapper"),
 	COMPAT_FULL,
@@ -119,9 +123,9 @@ const MapperInfo MapperInfo_UNL_Sachen_8259A =
 	SaveLoad,
 	NULL,
 	NULL
-};
-const MapperInfo MapperInfo_UNL_Sachen_8259B =
-{
+);
+const MapperInfo MapperInfo_UNL_Sachen_8259B
+(
 	"UNL-Sachen-8259B",
 	_T("Sachen mapper"),
 	COMPAT_FULL,
@@ -133,4 +137,4 @@ const MapperInfo MapperInfo_UNL_Sachen_8259B =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

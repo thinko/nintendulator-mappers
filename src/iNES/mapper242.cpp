@@ -12,7 +12,7 @@ void	Sync (void)
 	EMU->SetPRG_ROM32(0x8, (Latch::Addr.b0 & 0x78) >> 3);
 	if (ROM->INES_Flags & 0x02)
 		EMU->SetPRG_RAM8(0x6, 0);
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 	if (Latch::Addr.b0 & 0x02)
 		EMU->Mirror_H();
 	else	EMU->Mirror_V();
@@ -20,7 +20,7 @@ void	Sync (void)
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -36,8 +36,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 242;
 } // namespace
 
-const MapperInfo MapperInfo_242 =
-{
+const MapperInfo MapperInfo_242
+(
 	&MapperNum,
 	_T("Waixing 74HC161"),
 	COMPAT_FULL,
@@ -49,4 +49,4 @@ const MapperInfo MapperInfo_242 =
 	Latch::SaveLoad_AL,
 	NULL,
 	NULL
-};
+);

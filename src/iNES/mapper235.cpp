@@ -61,7 +61,7 @@ void	Sync (void)
 		}
 		else	EMU->SetPRG_ROM32(0x8, (PRGchip << 5) | PRGbank);
 	}
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 	if (Mir_S0)
 		EMU->Mirror_S0();
 	else if (Mir_HV)
@@ -71,7 +71,7 @@ void	Sync (void)
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, TRUE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -86,8 +86,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 235;
 } // namespace
 
-const MapperInfo MapperInfo_235 =
-{
+const MapperInfo MapperInfo_235
+(
 	&MapperNum,
 	_T("Golden Game 150-in-1"),
 	COMPAT_FULL,
@@ -99,4 +99,4 @@ const MapperInfo MapperInfo_235 =
 	Latch::SaveLoad_A,
 	NULL,
 	NULL
-};
+);

@@ -11,7 +11,7 @@ uint8_t Mode;
 
 void	Sync (void)
 {
-	EMU->SetCHR_RAM8(0, 0);
+	EMU->SetCHR_RAM8(0x0, 0);
 	if (Mode)
 	{
 		if (Latch::Data & 0x20)
@@ -34,16 +34,20 @@ void	Sync (void)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
-	offset = Latch::SaveLoad_D(mode, offset, data);
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
+	CheckSave(offset = Latch::SaveLoad_D(mode, offset, data));
 	SAVELOAD_BYTE(mode, offset, data, Mode);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode))
 		Sync();
 	return offset;
 }
 
 BOOL	MAPINT	Load (void)
 {
-	Latch::Load(Sync, FALSE);
+	Latch::Load(Sync, FALSE, FALSE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -62,8 +66,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 230;
 } // namespace
 
-const MapperInfo MapperInfo_230 =
-{
+const MapperInfo MapperInfo_230
+(
 	&MapperNum,
 	_T("22-in-1"),
 	COMPAT_FULL,
@@ -75,4 +79,4 @@ const MapperInfo MapperInfo_230 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

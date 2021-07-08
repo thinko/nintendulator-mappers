@@ -163,15 +163,19 @@ void	MAPINT	Write (int Bank, int Addr, int Val)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, Mode);
 	for (int i = 0; i < 2; i++)
 		SAVELOAD_BYTE(mode, offset, data, VRC2::PRG[i]);
 	for (int i = 0; i < 8; i++)
 		SAVELOAD_BYTE(mode, offset, data, VRC2::CHR[i].b0);
 	SAVELOAD_BYTE(mode, offset, data, VRC2::Mirror);
-	offset = MMC3::SaveLoad(mode, offset, data);
-	offset = MMC1::SaveLoad(mode, offset, data);
-	if (mode == STATE_LOAD)
+	CheckSave(offset = MMC3::SaveLoad(mode, offset, data));
+	CheckSave(offset = MMC1::SaveLoad(mode, offset, data));
+
+	if (IsLoad(mode))
 	{
 		SetMode();
 		Sync();
@@ -182,8 +186,8 @@ int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 BOOL	MAPINT	Load (void)
 {
 	iNES_SetSRAM();
-	MMC1::Load(Sync);
-	MMC3::Load(Sync);
+	MMC1::Load(Sync, FALSE);
+	MMC3::Load(Sync, FALSE);
 	return TRUE;
 }
 void	MAPINT	Reset (RESET_TYPE ResetType)
@@ -217,8 +221,8 @@ void	MAPINT	Unload (void)
 uint16_t MapperNum = 116;
 } // namespace
 
-const MapperInfo MapperInfo_116 =
-{
+const MapperInfo MapperInfo_116
+(
 	&MapperNum,
 	_T("AV Girl Fighting (combination MMC1+MMC3+VRC2)"),
 	COMPAT_PARTIAL,
@@ -230,4 +234,4 @@ const MapperInfo MapperInfo_116 =
 	SaveLoad,
 	NULL,
 	NULL
-};
+);

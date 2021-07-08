@@ -15,10 +15,12 @@ uint8_t WRAMEnab;
 uint8_t Mirror;
 FCPUWrite _CPUWrite[2];
 FSync Sync;
+BOOL SyncOnLoad;
 
-void	Load (FSync _Sync)
+void	Load (FSync _Sync, BOOL _SyncOnLoad)
 {
 	Sync = _Sync;
+	SyncOnLoad = _SyncOnLoad;
 }
 
 void	Reset (RESET_TYPE ResetType)
@@ -31,7 +33,10 @@ void	Reset (RESET_TYPE ResetType)
 		CHR[4] = 0x04;	CHR[5] = 0x05;	CHR[6] = 0x06;	CHR[7] = 0x07;
 
 		IRQenabled = IRQcounter = IRQlatch = 0;
+		IRQreload = IRQaddr = 0;
 		Cmd = 0;
+		// For compatibility, enable RAM by default
+		// but if the program writes to $A001, it'll still turn it off
 		if (ROM->ROMType == ROM_INES)
 			WRAMEnab = 0x80;
 		else	WRAMEnab = 0;
@@ -80,7 +85,7 @@ int	GetCHRBank (int Bank)
 void	SyncPRG (int AND, int OR)
 {
 	for (int i = 0; i < 4; i++)
-		EMU->SetPRG_ROM8(8 | (i << 1), (GetPRGBank(i) & AND) | OR);
+		EMU->SetPRG_ROM8(0x8 | (i << 1), (GetPRGBank(i) & AND) | OR);
 }
 
 void	SyncWRAM (void)
@@ -108,27 +113,21 @@ void	SyncCHR_RAM (int AND, int OR)
 
 int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 {
+	uint8_t ver = 0;
+	CheckSave(SAVELOAD_VERSION(mode, offset, data, ver));
+
 	SAVELOAD_BYTE(mode, offset, data, IRQcounter);
 	SAVELOAD_BYTE(mode, offset, data, IRQlatch);
 	SAVELOAD_BYTE(mode, offset, data, IRQenabled);
 	SAVELOAD_BYTE(mode, offset, data, Cmd);
 	for (int i = 0; i < 2; i++)
 		SAVELOAD_BYTE(mode, offset, data, PRG[i]);
-	switch (mode)
+	SAVELOAD_BYTE(mode, offset, data, CHR[0]);
+	SAVELOAD_BYTE(mode, offset, data, CHR[2]);
+	if (IsLoad(mode))
 	{
-	case STATE_SAVE:
-		data[offset++] = CHR[0];
-		data[offset++] = CHR[2];
-		break;
-	case STATE_LOAD:
-		CHR[0] = data[offset++];
 		CHR[1] = CHR[0] | 1;
-		CHR[2] = data[offset++];
 		CHR[3] = CHR[2] | 1;
-		break;
-	case STATE_SIZE:
-		offset += 2;
-		break;
 	}
 	for (int i = 4; i < 8; i++)
 		SAVELOAD_BYTE(mode, offset, data, CHR[i]);
@@ -136,7 +135,8 @@ int	MAPINT	SaveLoad (STATE_TYPE mode, int offset, unsigned char *data)
 	SAVELOAD_BYTE(mode, offset, data, Mirror);
 	SAVELOAD_BYTE(mode, offset, data, IRQreload);
 	SAVELOAD_BYTE(mode, offset, data, IRQaddr);
-	if (mode == STATE_LOAD)
+
+	if (IsLoad(mode) && SyncOnLoad)
 		Sync();
 	return offset;
 }
@@ -170,7 +170,7 @@ void	MAPINT	CPUWrite89 (int Bank, int Addr, int Val)
 void	MAPINT	CPUWriteAB (int Bank, int Addr, int Val)
 {
 	if (Addr & 1)
-		WRAMEnab = (ROM->ROMType == ROM_INES) ? 0x80 : Val;
+		WRAMEnab = Val;
 	else	Mirror = Val;
 	Sync();
 }
